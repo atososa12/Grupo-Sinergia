@@ -2,7 +2,7 @@
 
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Nuevo Socio
+            Nuevo Instructor
         </h2>
     </x-slot>
 
@@ -10,18 +10,13 @@
 
         <div class="max-w-3xl mx-auto bg-white shadow-md rounded-lg p-6">
 
-            @if ($errors->any())
-                <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
-                    @foreach ($errors->all() as $error)
-                        <div>{{ $error }}</div>
-                    @endforeach
-                </div>
-            @endif
+            <form action="{{ route('instructores.store') }}" method="POST" class="space-y-4">
 
-            <form action="{{ route('socios.store') }}" method="POST" class="space-y-4">
                 @csrf
 
-                @include('socios.form')
+                <div class="bg-white">
+                    @include('instructores.form')
+                </div>
 
                 <div class="flex justify-end">
                     <button class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded">

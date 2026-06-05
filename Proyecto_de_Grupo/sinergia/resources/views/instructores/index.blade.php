@@ -2,14 +2,14 @@
 
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Listado de Socios
+            Listado de Instructores
         </h2>
     </x-slot>
 
     <div class="py-4 px-4">
 
-        <a href="{{ route('socios.create') }}" class="btn-nuevo">
-            Nuevo Socio
+        <a href="{{ route('instructores.create') }}" class="btn-nuevo">
+            Nuevo Instructor
         </a>
 
         @if(session('success'))
@@ -23,24 +23,29 @@
             <tr>
                 <th>ID</th>
                 <th>Nombre</th>
-                <th>Documento</th>
+                <th>Especialidad</th>
                 <th>Email</th>
                 <th>Teléfono</th>
                 <th>Activo</th>
                 <th>Acciones</th>
             </tr>
 
-            @foreach($socios as $socio)
+            @foreach($instructores as $instructor)
 
             <tr>
-                <td>{{ $socio->SocioID }}</td>
-                <td>{{ $socio->Nombre }}</td>
-                <td>{{ $socio->Documento }}</td>
-                <td>{{ $socio->Email }}</td>
-                <td>{{ $socio->Telefono }}</td>
+
+                <td>{{ $instructor->InstructorID }}</td>
+
+                <td>{{ $instructor->Nombre }}</td>
+
+                <td>{{ $instructor->Especialidad }}</td>
+
+                <td>{{ $instructor->Email }}</td>
+
+                <td>{{ $instructor->Telefono }}</td>
 
                 <td>
-                    @if($socio->Activo)
+                    @if($instructor->Activo)
                         <span style="color: green; font-weight: bold;">
                             Activo
                         </span>
@@ -53,11 +58,12 @@
 
                 <td>
 
-                    <a href="{{ route('socios.edit', $socio->SocioID) }}" class="btn-editar">
+                    <a href="{{ route('instructores.edit', $instructor->InstructorID) }}"
+                       class="btn-editar">
                         Editar
                     </a>
 
-                    <form action="{{ route('socios.destroy', $socio->SocioID) }}"
+                    <form action="{{ route('instructores.destroy', $instructor->InstructorID) }}"
                           method="POST"
                           style="display:inline;">
 
@@ -67,7 +73,7 @@
                         <button
                             type="submit"
                             class="btn-eliminar"
-                            onclick="return confirm('¿Está seguro que desea eliminar este socio?')">
+                            onclick="return confirm('¿Está seguro que desea eliminar este instructor?')">
                             Eliminar
                         </button>
 

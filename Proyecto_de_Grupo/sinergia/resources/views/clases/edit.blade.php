@@ -2,7 +2,7 @@
 
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Editar Socio
+            Editar Clase
         </h2>
     </x-slot>
 
@@ -10,22 +10,18 @@
 
         <div class="max-w-3xl mx-auto bg-white shadow-md rounded-lg p-6">
 
-            @if ($errors->any())
-                <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
-                    @foreach ($errors->all() as $error)
-                        <div>{{ $error }}</div>
-                    @endforeach
-                </div>
-            @endif
+            <form action="{{ route('clases.update', $clase->ClaseID) }}" method="POST" class="space-y-4">
 
-            <form action="{{ route('socios.update', $socio->SocioID) }}" method="POST" class="space-y-4">
                 @csrf
                 @method('PUT')
 
-                @include('socios.form')
+                <div class="bg-white">
+                    @include('clases.form')
+                </div>
 
                 <div class="flex justify-end gap-3">
-                    <a href="{{ route('socios.index') }}"
+
+                    <a href="{{ route('clases.index') }}"
                        class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded">
                         Cancelar
                     </a>
@@ -33,6 +29,7 @@
                     <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded">
                         Actualizar
                     </button>
+
                 </div>
 
             </form>
