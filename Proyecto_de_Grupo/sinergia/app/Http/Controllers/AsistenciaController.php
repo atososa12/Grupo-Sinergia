@@ -82,7 +82,9 @@ class AsistenciaController extends Controller
         return null;
     }
 
- 
+    // -----------------------------
+    // DUPLICADOS
+    // -----------------------------
     private function existeDuplicado($request, $excludeId = null)
     {
         $fecha = Carbon::parse($request->FechaEntrada)->toDateString();
@@ -147,7 +149,9 @@ class AsistenciaController extends Controller
         return view('asistencias.edit', compact('asistencia', 'socios', 'clases'));
     }
 
-   
+    // -----------------------------
+    // UPDATE
+    // -----------------------------
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -184,7 +188,7 @@ class AsistenciaController extends Controller
             ->with('success', 'Asistencia actualizada correctamente');
     }
 
-   
+    
     public function destroy($id)
     {
         $asistencia = Asistencia::findOrFail($id);
