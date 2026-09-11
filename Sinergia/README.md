@@ -7,52 +7,127 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About Laravel
+## Sinergia
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+5. Maquetación del proyecto
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Cada negocio es un “tenant” dentro del sistema.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+1) El dueño del negocio crea su comercio
+Cuando un cliente del SaaS entra a /register o /registro-negocio, ese flujo no crea solo un usuario: crea dos cosas a la vez:
 
-## Learning Laravel
+un registro en la tabla comercio
+un usuario con rol dueño vinculado a ese comercio
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Esto está en RegistroNegocioController.php.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+La lógica es:
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+toma los datos del negocio
+crea el Comercio
+crea el User con:
+nombre
+apellido
+email
+contraseña
+rol = dueño
+id_comercio = el ID del comercio recién creado
+hace login automático
+redirige al dashboard
 
-## Agentic Development
+Entonces, el dueño queda “asociado” a su negocio mediante la relación id_comercio en User.php y Comercio.php.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+2) ¿Dónde agregan sus productos y datos del comercio?
+Después del registro, el dueño entra a /dashboard.
 
-```bash
-composer require laravel/boost --dev
+Ahí se muestran:
 
-php artisan boost:install
-```
+nombre del comercio
+formulario para agregar productos
+lista de productos
+pedidos recibidos
+posibilidad de cambiar estados del pedido
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Todo eso se resuelve en DashboardController.php y la vista en index.blade.php.
 
-## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-## Code of Conduct
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-## Security Vulnerabilities
+Auth::user() devuelve el usuario logueado
+$usuario->comercio trae el comercio del dueño
+todos los productos creados se guardan con id_comercio = comercio actual
+todos los pedidos también quedan ligados al mismo comercio
+Es decir, el negocio no “vive” en una app global separada: vive en una fila de la tabla comercio y todas sus entidades relacionadas apuntan a ese id_comercio.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+3) ¿Cuál es la vista final para el cliente común?
+La vista pública del cliente es:
 
-## License
+/comercio/{idComercio}
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Eso lo maneja TiendaController.php y la vista pública está en show.blade.php.
+
+Allí el cliente común ve:
+
+nombre del negocio
+dirección y contacto
+catálogo de productos
+carrito
+formulario de pedido
+checkout
+
+Ese cliente no necesita estar logueado para comprar. El pedido se crea con id_usuario = null, y queda asociado al comercio mediante id_comercio.
+
+4) ¿Cómo se registra el usuario final al negocio?
+Actualmente, no se registra como “cliente del negocio”.
+
+La implementación actual de compra es anónima:
+
+el usuario final completa nombre, teléfono, dirección y hace el pedido
+no hay login del cliente
+no hay cuenta de cliente
+no hay membresía al negocio
+
+Para un SaaS con “clientes registrados”, se debe implementar: .
+
+un usuario cliente separado del usuario dueño
+una relación entre cliente y negocio
+por ejemplo:
+cliente puede registrarse con email/password
+puede guardar dirección
+puede ver historial de compras
+puede tener favoritos, suscripciones, etc.
+Resumen de la arquitectura actual
+
+
+El sistema funciona así:
+
+Un cliente del SaaS crea su negocio desde /registro-negocio
+Se crea:
+Comercio
+Usuario dueño vinculado a ese comercio
+El dueño entra a /dashboard
+Ahí agrega productos y ve pedidos
+El cliente final entra a /comercio/{idComercio}
+Ve el catálogo y hace un pedido sin login
+El pedido queda asociado al comercio y se procesa desde el dashboard del dueño
+
+Lo que falta para el SaaS
+
+cada comercio es un tenant
+cada dueño puede tener varios comercios
+cada cliente puede registrarse y comprar
+cada negocio puede tener una base de clientes propia
+se recomienda un modelo de “usuarios con roles” y otra tabla de clientes por negocio
+Si quieres, en el próximo paso puedo dejarte la estructura exacta para esto:
+
+dueño crea negocio
+dueño crea productos
+cliente se registra
+cliente compra y guarda historial
+el negocio ve sus clientes y pedidos
+cada negocio queda totalmente aislado del resto
+Si te parece, te armo esa versión pro del SaaS en este mismo proyecto.
+
+
+
