@@ -31,7 +31,7 @@ apellido
 email
 contraseña
 rol = dueño
-id_comercio = el ID del comercio recién creado
+id_comercio = el ID del comercio recién creado (numerado, por ejemplo, el primer comercio en la BD es 1, el segundo 2 y así. Habría que revisar  esa lógica)
 hace login automático
 redirige al dashboard
 
@@ -63,7 +63,7 @@ Es decir, el negocio no “vive” en una app global separada: vive en una fila 
 3) ¿Cuál es la vista final para el cliente común?
 La vista pública del cliente es:
 
-/comercio/{idComercio}
+/comercio/{idComercio} (idcomercio es un número. Para el prototipo, debería ser el "username". Por ejemplo, si es lacuartamasa, la url debería ser sinergia.uy/comercio/lacuartamasa... Actualmente es sinergia.uy/comercio/1; sinergia.uy/comercio/2 y así. 
 
 Eso lo maneja TiendaController.php y la vista pública está en show.blade.php.
 
