@@ -34,3 +34,8 @@ Route::middleware('auth')->group(function () {
 });
  
 
+Route::put('/dashboard/productos/{idProducto}', [DashboardController::class, 'updateProducto'])
+    ->name('dashboard.producto.update');
+
+Route::delete('/dashboard/productos/{idProducto}', [DashboardController::class, 'destroyProducto'])
+    ->name('dashboard.producto.destroy');

@@ -11,12 +11,23 @@ use Illuminate\Support\Facades\DB;
 
 class TiendaController extends Controller
 {
-    public function show(string $idComercio)
-    {
-        $comercio = Comercio::with('productos.precios.tipoPrecio')->findOrFail($idComercio);
+   public function show(string $idComercio)
+{
+    $comercio = Comercio::with([
+        'productos' => function ($query) {
+            $query->where('disponible', 1)
+                  ->where(function ($q) {
+                      $q->whereNull('stock')
+                        ->orWhere('stock', '>', 0);
+                  });
+        },
+        'productos.precios' => function ($query) {
+            $query->where('id_tipo_precio', 1);
+        },
+    ])->findOrFail($idComercio);
 
-        return view('storefront.show', compact('comercio'));
-    }
+    return view('storefront.show', compact('comercio'));
+}
 
     public function storePedido(Request $request, string $idComercio)
     {

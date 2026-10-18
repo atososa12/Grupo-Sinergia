@@ -42,10 +42,23 @@
     </div>
 </div>
 
-        @if(session('success'))
-            <div class="alert">{{ session('success') }}</div>
-        @endif
+      @if(session('error'))
+    <div style="background:#fee2e2; color:#991b1b;
+                padding:.8rem 1rem; border-radius:8px; margin-bottom:1rem;">
+        {{ session('error') }}
+    </div>
+@endif
 
+@if($errors->any())
+    <div style="background:#fee2e2; color:#991b1b;
+                padding:.8rem 1rem; border-radius:8px; margin-bottom:1rem;">
+        <ul>
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
         <div class="grid">
             <section class="card">
                 <h2>Agregar producto</h2>
@@ -58,19 +71,72 @@
                     <button type="submit" class="btn">Guardar</button>
                 </form>
                 <hr>
-                <h3>Productos actuales</h3>
-                <ul>
-                    @forelse($productos as $producto)
-                        @php $precio = $producto->precios->first(); @endphp
-                        <li>
-                            <strong>{{ $producto->nombre }}</strong>
-                            - ${{ number_format($precio?->precio ?? 0, 2, ',', '.') }}
-                            - Stock: {{ $producto->stock }}
-                        </li>
-                    @empty
-                        <li>No hay productos aún.</li>
-                    @endforelse
-                </ul>
+               
+<h3>Productos actuales</h3>
+
+@forelse($productos as $producto)
+    @php
+        $precio = $producto->precios->first();
+    @endphp
+
+    <div style="border: 1px solid #e5e7eb; padding: 1rem;
+                border-radius: 10px; margin-bottom: 1rem;">
+
+        <strong>{{ $producto->nombre }}</strong>
+        <p>
+            Precio: ${{ number_format($precio?->precio ?? 0, 2, ',', '.') }}
+            <br>
+            Stock: {{ $producto->stock }}
+        </p>
+
+        <details>
+            <summary style="cursor:pointer; margin-bottom:1rem;">
+                Editar producto
+            </summary>
+
+            <form method="POST"
+                  action="{{ route('dashboard.producto.update', $producto->id_producto) }}">
+                @csrf
+                @method('PUT')
+
+                <label>Nombre</label>
+                <input type="text" name="nombre"
+                       value="{{ $producto->nombre }}" required>
+
+                <label>Descripción</label>
+                <textarea name="descripcion">{{ $producto->descripcion }}</textarea>
+
+                <label>Stock</label>
+                <input type="number" name="stock" min="0"
+                       value="{{ $producto->stock }}" required>
+
+                <label>Precio</label>
+                <input type="number" name="precio" min="0" step="0.01"
+                       value="{{ $precio?->precio ?? 0 }}" required>
+
+                <button type="submit" class="btn">
+                    Guardar cambios
+                </button>
+            </form>
+        </details>
+
+        <form method="POST"
+              action="{{ route('dashboard.producto.destroy', $producto->id_producto) }}"
+              onsubmit="return confirm('¿Seguro que querés eliminar este producto?');"
+              style="margin-top:1rem;">
+            @csrf
+            @method('DELETE')
+
+            <button type="submit" class="btn"
+                    style="background:#b91c1c;">
+                Eliminar producto
+            </button>
+        </form>
+    </div>
+@empty
+    <p>No hay productos aún.</p>
+@endforelse
+
             </section>
 
             <section class="card">
@@ -128,13 +194,15 @@
                                 <td>
                                     <form method="POST" action="{{ route('dashboard.pedido.estado', $pedido->id_pedido) }}">
                                         @csrf
-                                        <select name="id_estado">
-                                            <option value="1">Pendiente</option>
-                                            <option value="2">Confirmado</option>
-                                            <option value="3">En preparación</option>
-                                            <option value="4">Enviado</option>
-                                            <option value="5">Entregado</option>
-                                        </select>
+                                        
+                                    <select name="id_estado">
+                                    <option value="1" {{ $pedido->id_estado == 1 ? 'selected' : '' }}>Pendiente</option>
+                                    <option value="2" {{ $pedido->id_estado == 2 ? 'selected' : '' }}>En preparación</option>
+                                    <option value="3" {{ $pedido->id_estado == 3 ? 'selected' : '' }}>Listo para entregar</option>
+                                    <option value="4" {{ $pedido->id_estado == 4 ? 'selected' : '' }}>Entregado</option>
+                                    <option value="5" {{ $pedido->id_estado == 5 ? 'selected' : '' }}>Cancelado</option>
+                                    </select>
+
                                         <button type="submit" class="btn" style="margin-top: .5rem;">Actualizar</button>
                                     </form>
                                 </td>

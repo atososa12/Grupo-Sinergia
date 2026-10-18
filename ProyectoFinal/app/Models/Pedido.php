@@ -8,7 +8,7 @@ class Pedido extends Model
 {
     protected $table = 'pedido';
     protected $primaryKey = 'id_pedido';
-    public $timestamps = true;
+    public $timestamps = false;
 
     protected $fillable = [
         'id_usuario',

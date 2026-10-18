@@ -36,7 +36,7 @@
                 <h2>Catálogo</h2>
                 <div class="product-list">
                     @forelse($comercio->productos as $producto)
-                        @php $precio = $producto->precios->first(); @endphp
+                        @php $precio = $producto->precios->first();@endphp
                         <div class="product">
                             <h3>{{ $producto->nombre }}</h3>
                             <p>{{ $producto->descripcion }}</p>
