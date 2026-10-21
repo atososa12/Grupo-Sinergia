@@ -88,8 +88,7 @@
                         Método de pago
                         <select name="metodo_pago">
                             <option value="1">Efectivo</option>
-                            <option value="2">Transferencia</option>
-                            <option value="3">Mercado Pago</option>
+                            <option value="2">POS</option>
                         </select>
                     </label>
 
