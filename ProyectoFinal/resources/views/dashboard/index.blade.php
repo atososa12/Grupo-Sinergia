@@ -165,7 +165,7 @@
                     <h3>Agregar método de pago</h3>
                     <form method="POST" action="{{ route('dashboard.metodos.pago.store') }}">
                         @csrf
-                        <input type="text" name="nombre" placeholder="Ej: Efectivo, Transferencia, Tarjeta" required>
+                        <input type="text" name="nombre" placeholder="Ej: Efectivo, POS" required>
                         <button type="submit" class="btn">Guardar método de pago</button>
                     </form>
                 </div>
