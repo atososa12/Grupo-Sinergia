@@ -2,32 +2,77 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Cliente;
 
-class Cliente extends Authenticatable
+class Pedido extends Model
 {
-    protected $connection = 'clientes';
+    protected $table = 'pedido';
 
-    protected $table = 'Clientes';
-
-    protected $primaryKey = 'id_cliente';
+    protected $primaryKey = 'id_pedido';
 
     public $timestamps = false;
 
     protected $fillable = [
-        'nombre',
-        'apellido',
-        'telefono',
-        'email',
-        'contrasena',
+        'id_usuario',
+        'fecha',
+        'id_tipo_entrega',
+        'direccion_entrega',
+        'fecha_programada',
+        'hora_programada',
+        'id_estado',
+        'total',
+        'id_comercio',
+        'id_cliente',
     ];
 
-    protected $hidden = [
-        'contrasena',
+    protected $casts = [
+        'total' => 'decimal:2',
+        'fecha' => 'datetime',
     ];
 
-    public function getAuthPassword()
+    public function comercio()
     {
-        return $this->contrasena;
+        return $this->belongsTo(
+            Comercio::class,
+            'id_comercio',
+            'id_comercio'
+        );
+    }
+
+    public function usuario()
+    {
+        return $this->belongsTo(
+            User::class,
+            'id_usuario',
+            'id_usuario'
+        );
+    }
+
+    public function cliente()
+    {
+        return $this->belongsTo(
+            Cliente::class,
+            'id_cliente',
+            'id_cliente'
+        );
+    }
+
+    public function detalles()
+    {
+        return $this->hasMany(
+            DetallePedido::class,
+            'id_pedido',
+            'id_pedido'
+        );
+    }
+
+    public function estadoPedido()
+    {
+        return $this->belongsTo(
+            EstadoPedido::class,
+            'id_estado',
+            'id_estado'
+        );
     }
 }
