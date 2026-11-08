@@ -24,7 +24,6 @@
             background: white;
             border-bottom: 1px solid #e5e5e5;
             padding: 20px 60px;
-
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -39,6 +38,7 @@
         nav {
             display: flex;
             gap: 15px;
+            align-items: center;
         }
 
         nav a {
@@ -63,11 +63,9 @@
 
         .hero {
             min-height: 70vh;
-
             display: flex;
             justify-content: center;
             align-items: center;
-
             text-align: center;
             padding: 40px 20px;
         }
@@ -106,6 +104,7 @@
             text-decoration: none;
             font-weight: bold;
             font-size: 16px;
+            transition: 0.2s;
         }
 
         .primary {
@@ -127,15 +126,45 @@
             background: #fff3ec;
         }
 
-        .features {
+        .customer-access {
             background: white;
+            padding: 65px 20px;
+            text-align: center;
+        }
+
+        .customer-content {
+            max-width: 750px;
+            margin: auto;
+            padding: 40px 30px;
+            background: #fff8f3;
+            border: 1px solid #f0dfd3;
+            border-radius: 14px;
+        }
+
+        .customer-content h2 {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .customer-content h2 span {
+            color: #d35400;
+        }
+
+        .customer-content p {
+            color: #666;
+            font-size: 17px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .features {
+            background: #f7f7f7;
             padding: 60px 30px;
         }
 
         .features-container {
             max-width: 1000px;
             margin: auto;
-
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 25px;
@@ -146,7 +175,7 @@
             padding: 30px 20px;
             border: 1px solid #e5e5e5;
             border-radius: 10px;
-            background: #fafafa;
+            background: white;
         }
 
         .feature h3 {
@@ -166,11 +195,25 @@
         }
 
         @media (max-width: 700px) {
-
             header {
                 padding: 20px;
                 flex-direction: column;
                 gap: 15px;
+            }
+
+            nav {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+
+            nav a {
+                padding: 9px 12px;
+                font-size: 14px;
+            }
+
+            .hero {
+                min-height: 60vh;
             }
 
             .hero h1 {
@@ -179,6 +222,14 @@
 
             .hero p {
                 font-size: 17px;
+            }
+
+            .customer-content {
+                padding: 35px 20px;
+            }
+
+            .customer-content h2 {
+                font-size: 27px;
             }
 
             .features-container {
@@ -197,19 +248,18 @@
     </div>
 
     <nav>
+       <a href="{{ route('comercios.index') }}">Soy cliente</a>
 
         <a href="{{ route('login') }}">
-            Iniciar sesión
+            Acceso comercios
         </a>
 
         <a href="{{ route('registro.negocio') }}" class="btn">
             Registrar mi comercio
         </a>
-
     </nav>
 
 </header>
-
 
 <main>
 
@@ -244,6 +294,27 @@
 
     </section>
 
+    <section class="customer-access">
+
+        <div class="customer-content">
+
+            <h2>
+                ¿Sos <span>cliente</span>?
+            </h2>
+
+            <p>
+                Creá tu cuenta en Sinergia y disfrutá de una experiencia
+                más sencilla al realizar pedidos en tus comercios favoritos.
+            </p>
+
+            <div class="buttons">
+    <a href="{{ route('comercios.index') }}" class="main-button primary">
+        Elegir comercio
+    </a>
+</div>
+        </div>
+
+    </section>
 
     <section class="features">
 
@@ -262,7 +333,6 @@
 
             </div>
 
-
             <div class="feature">
 
                 <h3>
@@ -275,7 +345,6 @@
                 </p>
 
             </div>
-
 
             <div class="feature">
 
@@ -296,7 +365,6 @@
 
 </main>
 
-
 <footer>
 
     <p>
@@ -307,4 +375,3 @@
 
 </body>
 </html>
-```

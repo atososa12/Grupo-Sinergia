@@ -53,6 +53,8 @@ class RegistroNegocioController extends Controller
 
         Auth::login($usuario);
 
-        return redirect()->route('dashboard');
+$request->session()->regenerate();
+
+return redirect()->route('dashboard');
     }
 }

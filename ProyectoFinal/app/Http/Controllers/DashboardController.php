@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
+use Illuminate\Validation\ValidationException;
 
 class DashboardController extends Controller
 {
@@ -79,109 +80,164 @@ class DashboardController extends Controller
 
         return back()->with('success', 'Producto agregado correctamente.');
     }
-    
-public function updateProducto(Request $request, $idProducto)
-{
-    $request->validate([
-        'nombre' => ['required', 'string', 'max:150'],
-        'descripcion' => ['nullable', 'string'],
-        'stock' => ['required', 'integer', 'min:0'],
-        'precio' => ['required', 'numeric', 'min:0'],
-    ]);
 
-    $comercio = Auth::user()?->comercio;
-
-    if (! $comercio) {
-        abort(403, 'Este usuario no tiene un comercio asociado.');
-    }
-
-    $producto = Producto::where('id_comercio', $comercio->id_comercio)
-        ->where('id_producto', $idProducto)
-        ->firstOrFail();
-
-    DB::transaction(function () use ($request, $producto) {
-        $producto->update([
-            'nombre' => $request->input('nombre'),
-            'descripcion' => $request->input('descripcion'),
-            'stock' => (int) $request->input('stock'),
+    public function updateProducto(Request $request, $idProducto)
+    {
+        $request->validate([
+            'nombre' => ['required', 'string', 'max:150'],
+            'descripcion' => ['nullable', 'string'],
+            'stock' => ['required', 'integer', 'min:0'],
+            'precio' => ['required', 'numeric', 'min:0'],
         ]);
 
-        $precioProducto = $producto->precios()->first();
+        $comercio = Auth::user()?->comercio;
 
-        if ($precioProducto) {
-            $precioProducto->update([
-                'precio' => $request->input('precio'),
+        if (! $comercio) {
+            abort(403, 'Este usuario no tiene un comercio asociado.');
+        }
+
+        $producto = Producto::where('id_comercio', $comercio->id_comercio)
+            ->where('id_producto', $idProducto)
+            ->firstOrFail();
+
+        DB::transaction(function () use ($request, $producto) {
+
+            $producto->update([
+                'nombre' => $request->input('nombre'),
+                'descripcion' => $request->input('descripcion'),
+                'stock' => (int) $request->input('stock'),
             ]);
-        } else {
-            $tipoPrecio = TipoPrecio::where('activo', true)
-                ->orderBy('id_tipo_precio')
-                ->first();
 
-            if (! $tipoPrecio) {
-                $tipoPrecio = TipoPrecio::create([
-                    'nombre' => 'General',
-                    'descripcion' => 'Precio base',
-                    'activo' => true,
+            $precioProducto = $producto->precios()->first();
+
+            if ($precioProducto) {
+
+                $precioProducto->update([
+                    'precio' => $request->input('precio'),
+                ]);
+
+            } else {
+
+                $tipoPrecio = TipoPrecio::where('activo', true)
+                    ->orderBy('id_tipo_precio')
+                    ->first();
+
+                if (! $tipoPrecio) {
+                    $tipoPrecio = TipoPrecio::create([
+                        'nombre' => 'General',
+                        'descripcion' => 'Precio base',
+                        'activo' => true,
+                    ]);
+                }
+
+                ProductoPrecio::create([
+                    'id_producto' => $producto->id_producto,
+                    'id_tipo_precio' => $tipoPrecio->id_tipo_precio,
+                    'precio' => $request->input('precio'),
+                ]);
+            }
+        });
+
+        return back()->with('success', 'Producto actualizado correctamente.');
+    }
+
+    public function destroyProducto($idProducto)
+    {
+        $comercio = Auth::user()?->comercio;
+
+        if (! $comercio) {
+            abort(403, 'Este usuario no tiene un comercio asociado.');
+        }
+
+        $producto = Producto::where('id_comercio', $comercio->id_comercio)
+            ->where('id_producto', $idProducto)
+            ->firstOrFail();
+
+        try {
+
+            DB::transaction(function () use ($producto) {
+                $producto->precios()->delete();
+                $producto->delete();
+            });
+
+        } catch (QueryException $e) {
+
+            return back()->with(
+                'error',
+                'No se pudo eliminar el producto. Puede estar asociado a pedidos existentes.'
+            );
+        }
+
+        return back()->with('success', 'Producto eliminado correctamente.');
+    }
+
+    public function updatePedidoEstado(Request $request, Pedido $pedido)
+    {
+        $request->validate([
+            'id_estado' => ['required', 'integer', 'exists:estado_pedido,id_estado'],
+        ]);
+
+        $comercio = Auth::user()?->comercio;
+
+        if (! $comercio || (int) $pedido->id_comercio !== (int) $comercio->id_comercio) {
+            abort(403, 'No tienes permisos para cambiar este pedido.');
+        }
+
+        $nuevoEstado = (int) $request->input('id_estado');
+
+        DB::transaction(function () use ($pedido, $comercio, $nuevoEstado) {
+
+            $pedidoActual = Pedido::where('id_pedido', $pedido->id_pedido)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ((int) $pedidoActual->id_comercio !== (int) $comercio->id_comercio) {
+                abort(403, 'No tienes permisos para cambiar este pedido.');
+            }
+
+            $estadoActual = (int) $pedidoActual->id_estado;
+
+            
+            if ($estadoActual === 5 && $nuevoEstado !== 5) {
+                throw ValidationException::withMessages([
+                    'id_estado' => 'Un pedido cancelado no puede volver a otro estado.',
                 ]);
             }
 
-            ProductoPrecio::create([
-                'id_producto' => $producto->id_producto,
-                'id_tipo_precio' => $tipoPrecio->id_tipo_precio,
-                'precio' => $request->input('precio'),
-            ]);
-        }
-    });
+           
+            if ($estadoActual === $nuevoEstado) {
+                return;
+            }
 
-    return back()->with('success', 'Producto actualizado correctamente.');
-}
+            
+            if ($nuevoEstado === 5) {
 
-public function destroyProducto($idProducto)
-{
-    $comercio = Auth::user()?->comercio;
+                $pedidoActual->load('detalles');
 
-    if (! $comercio) {
-        abort(403, 'Este usuario no tiene un comercio asociado.');
-    }
+                foreach ($pedidoActual->detalles as $detalle) {
 
-    $producto = Producto::where('id_comercio', $comercio->id_comercio)
-        ->where('id_producto', $idProducto)
-        ->firstOrFail();
+                    $producto = Producto::where(
+                        'id_producto',
+                        $detalle->id_producto
+                    )
+                        ->where('id_comercio', $comercio->id_comercio)
+                        ->lockForUpdate()
+                        ->firstOrFail();
 
-    try {
-        DB::transaction(function () use ($producto) {
-            $producto->precios()->delete();
-            $producto->delete();
+                    if ($producto->stock !== null) {
+                        $producto->increment('stock', (int) $detalle->cantidad);
+                    }
+                }
+            }
+
+            // Actualizar el estado del pedido.
+            $pedidoActual->id_estado = $nuevoEstado;
+            $pedidoActual->save();
+
         });
-    } catch (QueryException $e) {
-        return back()->with(
-            'error',
-            'No se pudo eliminar el producto. Puede estar asociado a pedidos existentes.'
-        );
+
+        return redirect()
+            ->route('dashboard')
+            ->with('success', 'Estado del pedido actualizado correctamente.');
     }
-
-    return back()->with('success', 'Producto eliminado correctamente.');
-}
-
-
-public function updatePedidoEstado(Request $request, Pedido $pedido)
-{
-    $request->validate([
-        'id_estado' => ['required', 'integer', 'exists:estado_pedido,id_estado'],
-    ]);
-
-    $comercio = Auth::user()?->comercio;
-
-    if (! $comercio || (int) $pedido->id_comercio !== (int) $comercio->id_comercio) {
-        abort(403, 'No tienes permisos para cambiar este pedido.');
-    }
-
-    $pedido->id_estado = (int) $request->input('id_estado');
-    $pedido->save();
-
-    return redirect()
-        ->route('dashboard')
-        ->with('success', 'Estado del pedido actualizado.');
-}
-
 }

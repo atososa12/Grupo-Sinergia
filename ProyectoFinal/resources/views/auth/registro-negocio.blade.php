@@ -85,61 +85,61 @@
 
         @if ($errors->any())
             <div class="alert">
-                {{ $errors->first() }}
+                <ul style="margin: 0; padding-left: 1.2rem;">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
             </div>
         @endif
 
         <form method="POST" action="{{ route('registro.negocio.submit') }}">
             @csrf
+
             <div class="grid">
                 <div class="field full">
                     <label for="nombre_comercio">Nombre del comercio</label>
-                    <input id="nombre_comercio" name="nombre_comercio" type="text" value="{{ old('nombre_comercio') }}" required>
+                    <input id="nombre_comercio" name="nombre_comercio" type="text" maxlength="150" value="{{ old('nombre_comercio') }}" required>
                 </div>
 
                 <div class="field full">
                     <label for="direccion">Dirección</label>
-                    <input id="direccion" name="direccion" type="text" value="{{ old('direccion') }}">
+                    <input id="direccion" name="direccion" type="text" maxlength="255" value="{{ old('direccion') }}">
                 </div>
 
                 <div class="field">
-                    <label for="telefono">Teléfono</label>
-                    <input id="telefono" name="telefono" type="text" value="{{ old('telefono') }}">
+                    <label for="telefono">Teléfono de contacto</label>
+                    <input id="telefono" name="telefono" type="text" maxlength="30" value="{{ old('telefono') }}">
                 </div>
 
                 <div class="field">
                     <label for="email_comercio">Email del comercio</label>
-                    <input id="email_comercio" name="email_comercio" type="email" value="{{ old('email_comercio') }}">
+                    <input id="email_comercio" name="email_comercio" type="email" maxlength="150" value="{{ old('email_comercio') }}">
                 </div>
 
                 <div class="field">
                     <label for="nombre">Nombre del dueño</label>
-                    <input id="nombre" name="nombre" type="text" value="{{ old('nombre') }}" required>
+                    <input id="nombre" name="nombre" type="text" maxlength="100" value="{{ old('nombre') }}" required>
                 </div>
 
                 <div class="field">
                     <label for="apellido">Apellido</label>
-                    <input id="apellido" name="apellido" type="text" value="{{ old('apellido') }}" required>
+                    <input id="apellido" name="apellido" type="text" maxlength="100" value="{{ old('apellido') }}" required>
                 </div>
 
-                <div class="field">
+                <div class="field full">
                     <label for="email">Email de acceso</label>
-                    <input id="email" name="email" type="email" value="{{ old('email') }}" required>
-                </div>
-
-                <div class="field">
-                    <label for="telefono_owner">Teléfono del dueño</label>
-                    <input id="telefono_owner" name="telefono" type="text" value="{{ old('telefono') }}">
+                    <input id="email" name="email" type="email" maxlength="150" value="{{ old('email') }}" required>
                 </div>
 
                 <div class="field">
                     <label for="password">Contraseña</label>
-                    <input id="password" name="password" type="password" required>
+                    <input id="password" name="password" type="password" minlength="8" required>
                 </div>
 
                 <div class="field">
                     <label for="password_confirmation">Confirmar contraseña</label>
-                    <input id="password_confirmation" name="password_confirmation" type="password" required>
+                    <input id="password_confirmation" name="password_confirmation" type="password" minlength="8" required>
                 </div>
             </div>
 

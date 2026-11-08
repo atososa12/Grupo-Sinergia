@@ -11,21 +11,22 @@ class Pedido extends Model
     public $timestamps = false;
 
     protected $fillable = [
-        'id_usuario',
-        'fecha',
-        'id_tipo_entrega',
-        'direccion_entrega',
-        'fecha_programada',
-        'hora_programada',
-        'id_estado',
-        'total',
-        'id_comercio',
-    ];
+    'id_usuario',
+    'fecha',
+    'id_tipo_entrega',
+    'direccion_entrega',
+    'fecha_programada',
+    'hora_programada',
+    'id_estado',
+    'total',
+    'id_comercio',
+    'id_cliente',
+];
 
     protected $casts = [
-        'total' => 'decimal:2',
-        'fecha' => 'datetime',
-    ];
+    'total' => 'decimal:2',
+    'fecha' => 'datetime',
+];
 
     public function comercio()
     {
