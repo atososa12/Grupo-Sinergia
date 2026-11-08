@@ -28,7 +28,11 @@ class DashboardController extends Controller
             ->latest('id_producto')
             ->get();
 
-        $pedidos = Pedido::with(['detalles.producto', 'estadoPedido'])
+        $pedidos = Pedido::with([
+            'detalles.producto',
+            'estadoPedido',
+            'cliente',
+        ])
             ->where('id_comercio', $comercio->id_comercio)
             ->latest('id_pedido')
             ->get();
@@ -197,19 +201,16 @@ class DashboardController extends Controller
 
             $estadoActual = (int) $pedidoActual->id_estado;
 
-            
             if ($estadoActual === 5 && $nuevoEstado !== 5) {
                 throw ValidationException::withMessages([
                     'id_estado' => 'Un pedido cancelado no puede volver a otro estado.',
                 ]);
             }
 
-           
             if ($estadoActual === $nuevoEstado) {
                 return;
             }
 
-            
             if ($nuevoEstado === 5) {
 
                 $pedidoActual->load('detalles');
@@ -230,7 +231,6 @@ class DashboardController extends Controller
                 }
             }
 
-            // Actualizar el estado del pedido.
             $pedidoActual->id_estado = $nuevoEstado;
             $pedidoActual->save();
 
