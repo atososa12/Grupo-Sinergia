@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Cliente;
 
 class Pedido extends Model
 {
@@ -11,22 +12,22 @@ class Pedido extends Model
     public $timestamps = false;
 
     protected $fillable = [
-    'id_usuario',
-    'fecha',
-    'id_tipo_entrega',
-    'direccion_entrega',
-    'fecha_programada',
-    'hora_programada',
-    'id_estado',
-    'total',
-    'id_comercio',
-    'id_cliente',
-];
+        'id_usuario',
+        'fecha',
+        'id_tipo_entrega',
+        'direccion_entrega',
+        'fecha_programada',
+        'hora_programada',
+        'id_estado',
+        'total',
+        'id_comercio',
+        'id_cliente',
+    ];
 
     protected $casts = [
-    'total' => 'decimal:2',
-    'fecha' => 'datetime',
-];
+        'total' => 'decimal:2',
+        'fecha' => 'datetime',
+    ];
 
     public function comercio()
     {
@@ -36,6 +37,11 @@ class Pedido extends Model
     public function usuario()
     {
         return $this->belongsTo(User::class, 'id_usuario', 'id_usuario');
+    }
+
+    public function cliente()
+    {
+        return $this->belongsTo(Cliente::class, 'id_cliente', 'id_cliente');
     }
 
     public function detalles()
