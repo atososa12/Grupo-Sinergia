@@ -1,377 +1,130 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Sinergia</title>
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f7f7f7;
-            color: #222;
-        }
-
-        header {
-            background: white;
-            border-bottom: 1px solid #e5e5e5;
-            padding: 20px 60px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 28px;
-            font-weight: bold;
-            color: #d35400;
-        }
-
-        nav {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-
-        nav a {
-            text-decoration: none;
-            color: #333;
-            padding: 10px 18px;
-            border-radius: 6px;
-        }
-
-        nav a:hover {
-            background: #f1f1f1;
-        }
-
-        .btn {
-            background: #d35400;
-            color: white !important;
-        }
-
-        .btn:hover {
-            background: #b84300 !important;
-        }
-
-        .hero {
-            min-height: 70vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 40px 20px;
-        }
-
-        .hero-content {
-            max-width: 800px;
-        }
-
-        .hero h1 {
-            font-size: 52px;
-            margin-bottom: 20px;
-        }
-
-        .hero h1 span {
-            color: #d35400;
-        }
-
-        .hero p {
-            font-size: 20px;
-            line-height: 1.6;
-            color: #666;
-            margin-bottom: 35px;
-        }
-
-        .buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .main-button {
-            display: inline-block;
-            padding: 14px 28px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 16px;
-            transition: 0.2s;
-        }
-
-        .primary {
-            background: #d35400;
-            color: white;
-        }
-
-        .primary:hover {
-            background: #b84300;
-        }
-
-        .secondary {
-            background: white;
-            color: #d35400;
-            border: 2px solid #d35400;
-        }
-
-        .secondary:hover {
-            background: #fff3ec;
-        }
-
-        .customer-access {
-            background: white;
-            padding: 65px 20px;
-            text-align: center;
-        }
-
-        .customer-content {
-            max-width: 750px;
-            margin: auto;
-            padding: 40px 30px;
-            background: #fff8f3;
-            border: 1px solid #f0dfd3;
-            border-radius: 14px;
-        }
-
-        .customer-content h2 {
-            font-size: 32px;
-            margin-bottom: 15px;
-        }
-
-        .customer-content h2 span {
-            color: #d35400;
-        }
-
-        .customer-content p {
-            color: #666;
-            font-size: 17px;
-            line-height: 1.6;
-            margin-bottom: 25px;
-        }
-
-        .features {
-            background: #f7f7f7;
-            padding: 60px 30px;
-        }
-
-        .features-container {
-            max-width: 1000px;
-            margin: auto;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 25px;
-        }
-
-        .feature {
-            text-align: center;
-            padding: 30px 20px;
-            border: 1px solid #e5e5e5;
-            border-radius: 10px;
-            background: white;
-        }
-
-        .feature h3 {
-            margin-bottom: 12px;
-        }
-
-        .feature p {
-            color: #666;
-            line-height: 1.5;
-        }
-
-        footer {
-            text-align: center;
-            padding: 25px;
-            background: #222;
-            color: white;
-        }
-
-        @media (max-width: 700px) {
-            header {
-                padding: 20px;
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            nav {
-                justify-content: center;
-                flex-wrap: wrap;
-                gap: 5px;
-            }
-
-            nav a {
-                padding: 9px 12px;
-                font-size: 14px;
-            }
-
-            .hero {
-                min-height: 60vh;
-            }
-
-            .hero h1 {
-                font-size: 38px;
-            }
-
-            .hero p {
-                font-size: 17px;
-            }
-
-            .customer-content {
-                padding: 35px 20px;
-            }
-
-            .customer-content h2 {
-                font-size: 27px;
-            }
-
-            .features-container {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
+<body class="bg-[#f7f7f7] text-[#222222] font-sans antialiased min-h-screen flex flex-col justify-between">
 
-<body>
 
-<header>
-
-    <div class="logo">
-        Sinergia
-    </div>
-
-    <nav>
-       <a href="{{ route('comercios.index') }}">Soy cliente</a>
-
-        <a href="{{ route('login') }}">
-            Acceso comercios
+    <header class="bg-white border-b border-slate-200 px-6 sm:px-12 py-5 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-50">
+      
+        <a href="/" class="flex items-center gap-3 no-underline">
+           
+            <img src="{{ asset('img/logo-sinergia.png') }}" alt="Logo Sinergia" class="h-10 w-auto object-contain">
+            <span class="text-2xl font-bold text-[#032B45] tracking-tight">Sinergia</span>
         </a>
 
-        <a href="{{ route('registro.negocio') }}" class="btn">
-            Registrar mi comercio
-        </a>
-    </nav>
+        
+        <nav class="flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-sm sm:text-base">
+            <a href="{{ route('comercios.index') }}" class="text-[#333333] hover:bg-slate-100 px-3.5 py-2 rounded-lg transition-colors no-underline">
+                Soy cliente
+            </a>
 
-</header>
+            <a href="{{ route('login') }}" class="text-[#333333] hover:bg-slate-100 px-3.5 py-2 rounded-lg transition-colors no-underline">
+                Acceso comercios
+            </a>
 
-<main>
+            <a href="{{ route('registro.negocio') }}" class="bg-[#00A88F] hover:bg-[#008f7a] text-white font-medium px-4 py-2 rounded-lg transition-colors no-underline">
+                Registrar mi comercio
+            </a>
+        </nav>
+    </header>
 
-    <section class="hero">
+    <main class="flex-grow">
+      
+        <section class="min-h-[60vh] sm:min-h-[70vh] flex justify-center items-center text-center px-5 py-10">
+            <div class="max-w-[800px] w-full">
+                <h1 class="text-3xl sm:text-5xl font-bold mb-5 leading-tight text-slate-900">
+                    Gestioná tu comercio con <span class="text-[#00A88F]">Sinergia</span>
+                </h1>
 
-        <div class="hero-content">
-
-            <h1>
-                Gestioná tu comercio con
-                <span>Sinergia</span>
-            </h1>
-
-            <p>
-                Una plataforma pensada para pequeños comercios,
-                que permite gestionar productos, pedidos y clientes
-                desde un mismo lugar.
-            </p>
-
-            <div class="buttons">
-
-                <a href="{{ route('login') }}" class="main-button primary">
-                    Iniciar sesión
-                </a>
-
-                <a href="{{ route('registro.negocio') }}" class="main-button secondary">
-                    Registrar mi comercio
-                </a>
-
-            </div>
-
-        </div>
-
-    </section>
-
-    <section class="customer-access">
-
-        <div class="customer-content">
-
-            <h2>
-                ¿Sos <span>cliente</span>?
-            </h2>
-
-            <p>
-                Creá tu cuenta en Sinergia y disfrutá de una experiencia
-                más sencilla al realizar pedidos en tus comercios favoritos.
-            </p>
-
-            <div class="buttons">
-    <a href="{{ route('comercios.index') }}" class="main-button primary">
-        Elegir comercio
-    </a>
-</div>
-        </div>
-
-    </section>
-
-    <section class="features">
-
-        <div class="features-container">
-
-            <div class="feature">
-
-                <h3>
-                    Gestión de productos
-                </h3>
-
-                <p>
-                    Administrá los productos y precios
-                    disponibles para tus clientes.
+                <p class="text-base sm:text-xl text-slate-600 leading-relaxed mb-9">
+                    Una plataforma pensada para pequeños comercios,
+                    que permite gestionar productos, pedidos y clientes
+                    desde un mismo lugar.
                 </p>
 
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="{{ route('login') }}" class="w-full sm:w-auto inline-block px-7 py-3.5 rounded-lg text-white font-bold text-base bg-[#032B45] hover:bg-[#021d30] transition-colors no-underline shadow-sm">
+                        Iniciar sesión
+                    </a>
+
+                    <a href="{{ route('registro.negocio') }}" class="w-full sm:w-auto inline-block px-7 py-3.5 rounded-lg text-[#00A88F] border-2 border-[#00A88F] bg-white hover:bg-[#E6F4F1] font-bold text-base transition-colors no-underline">
+                        Registrar mi comercio
+                    </a>
+                </div>
             </div>
+        </section>
 
-            <div class="feature">
+      
+        <section class="bg-white py-16 px-5 text-center">
+            <div class="max-w-[750px] mx-auto p-8 sm:p-10 bg-[#E6F4F1]/60 border border-[#00A88F]/30 rounded-2xl">
+                <h2 class="text-2xl sm:text-3xl font-bold mb-4 text-[#032B45]">
+                    ¿Sos <span class="text-[#00A88F]">cliente</span>?
+                </h2>
 
-                <h3>
-                    Gestión de pedidos
-                </h3>
-
-                <p>
-                    Recibí y gestioná los pedidos
-                    realizados desde tu tienda.
+                <p class="text-slate-600 text-base sm:text-lg leading-relaxed mb-6">
+                    Creá tu cuenta en Sinergia y disfrutá de una experiencia
+                    más sencilla al realizar pedidos en tus comercios favoritos.
                 </p>
 
+                <div class="flex justify-center">
+                    <a href="{{ route('comercios.index') }}" class="w-full sm:w-auto inline-block px-7 py-3.5 rounded-lg text-white font-bold text-base bg-[#00A88F] hover:bg-[#008f7a] transition-colors no-underline shadow-sm">
+                        Elegir comercio
+                    </a>
+                </div>
             </div>
+        </section>
 
-            <div class="feature">
+      
+        <section class="bg-[#f7f7f7] py-16 px-6 sm:px-8">
+            <div class="max-w-[1000px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
 
-                <h3>
-                    Tienda online
-                </h3>
+                
+                <div class="bg-white p-7 text-center border border-slate-200 rounded-xl shadow-sm">
+                    <h3 class="text-xl font-bold mb-3 text-[#032B45]">
+                        Gestión de productos
+                    </h3>
+                    <p class="text-slate-600 text-sm leading-normal">
+                        Administrá los productos y precios
+                        disponibles para tus clientes.
+                    </p>
+                </div>
 
-                <p>
-                    Ofrecé a tus clientes una tienda
-                    accesible desde cualquier dispositivo.
-                </p>
+                
+                <div class="bg-white p-7 text-center border border-slate-200 rounded-xl shadow-sm">
+                    <h3 class="text-xl font-bold mb-3 text-[#032B45]">
+                        Gestión de pedidos
+                    </h3>
+                    <p class="text-slate-600 text-sm leading-normal">
+                        Recibí y gestioná los pedidos
+                        realizados desde tu tienda.
+                    </p>
+                </div>
+
+                <div class="bg-white p-7 text-center border border-slate-200 rounded-xl shadow-sm">
+                    <h3 class="text-xl font-bold mb-3 text-[#032B45]">
+                        Tienda online
+                    </h3>
+                    <p class="text-slate-600 text-sm leading-normal">
+                        Ofrecé a tus clientes una tienda
+                        accesible desde cualquier dispositivo.
+                    </p>
+                </div>
 
             </div>
+        </section>
+    </main>
 
-        </div>
-
-    </section>
-
-</main>
-
-<footer>
-
-    <p>
-        © {{ date('Y') }} Sinergia. Todos los derechos reservados.
-    </p>
-
-</footer>
+    <footer class="bg-[#222222] text-white text-center p-6">
+        <p class="text-sm">
+            © {{ date('Y') }} Sinergia. Todos los derechos reservados.
+        </p>
+    </footer>
 
 </body>
 </html>
