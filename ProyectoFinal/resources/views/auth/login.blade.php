@@ -3,46 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Dashboard</title>
+    <title>Acceso al negocio - Sinergia</title>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body style="font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; display:flex; align-items:center; justify-content:center; min-height:100vh;">
+<body class="bg-slate-900 text-slate-800 font-sans antialiased min-h-screen flex">
 
-    <div style="background:white; padding: 2rem; border-radius: 12px; width: min(420px, 90vw); box-shadow: 0 8px 30px rgba(0,0,0,0.08);">
+    <div class="w-full min-h-screen grid grid-cols-1 lg:grid-cols-12">
+        
+        <div class="hidden lg:flex lg:col-span-5 xl:col-span-6 bg-gradient-to-br from-[#032B45] via-[#021d30] to-[#00A88F] p-12 flex-col justify-between relative overflow-hidden">
+            <div class="absolute -top-16 -left-16 w-64 h-64 bg-white/5 rounded-full blur-2xl"></div>
+            <div class="absolute -bottom-20 -right-20 w-80 h-80 bg-[#00A88F]/20 rounded-full blur-3xl"></div>
 
-        <h1 style="margin-top:0;">Acceso al negocio</h1>
-
-        @if ($errors->any())
-            <div style="background:#fee2e2; color:#991b1b; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem;">
-                {{ $errors->first() }}
-            </div>
-        @endif
-
-        <form method="POST" action="{{ route('login.submit') }}">
-            @csrf
-
-            <div style="margin-bottom: 1rem;">
-                <label for="email" style="display:block; margin-bottom:0.4rem;">Email</label>
-                <input id="email" name="email" type="email" value="{{ old('email') }}" required style="width:100%; padding:0.8rem; border:1px solid #d1d5db; border-radius:8px; box-sizing:border-box;">
+            <div class="relative z-10">
+                <a href="/" class="inline-flex items-center gap-5">
+                    <img src="{{ asset('img/logo-sinergia.png') }}" alt="Logo Sinergia" class="h-28 w-28 object-cover rounded-full shadow-xl">
+                    <span class="text-5xl font-black text-white tracking-tight">Sinergia</span>
+                </a>
             </div>
 
-            <div style="margin-bottom: 1rem;">
-                <label for="password" style="display:block; margin-bottom:0.4rem;">Contraseña</label>
-                <input id="password" name="password" type="password" required style="width:100%; padding:0.8rem; border:1px solid #d1d5db; border-radius:8px; box-sizing:border-box;">
+            <div class="relative z-10 my-auto py-12">
+                <span class="inline-block bg-[#00A88F]/20 text-[#00A88F] text-xs font-bold uppercase tracking-widest px-3.5 py-1.5 rounded-full border border-[#00A88F]/30 mb-5">
+                    Panel de Comercios
+                </span>
+                <h2 class="text-4xl xl:text-5xl font-black text-white leading-tight mb-5">
+                    Potenciá las ventas de tu local.
+                </h2>
+                <p class="text-slate-300 text-lg leading-relaxed max-w-md">
+                    Gestioná tu catálogo de productos, recibí pedidos en tiempo real y conectá con tus clientes desde un solo lugar.
+                </p>
             </div>
 
-            <button type="submit" style="width:100%; background:#111827; color:white; border:none; padding:0.9rem; border-radius:8px; font-weight:bold; cursor:pointer;">
-                Ingresar
-            </button>
-        </form>
+            <div class="relative z-10 text-slate-400 text-sm">
+                © {{ date('Y') }} Sinergia. Tu local, más cerca.
+            </div>
+        </div>
 
-        <div style="text-align:center; margin-top:20px;">
-            <p style="margin-bottom:8px;">
-                ¿Todavía no tenés una cuenta?
-            </p>
+        <div class="col-span-1 lg:col-span-7 xl:col-span-6 bg-slate-50 flex items-center justify-center p-6 sm:p-12">
+            
+            <div class="w-full max-w-md bg-white p-8 sm:p-10 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100">
+                
+                <div class="lg:hidden text-center mb-6">
+                    <a href="/" class="inline-block">
+                        <img src="{{ asset('img/logo-sinergia.png') }}" alt="Logo Sinergia" class="h-32 w-32 object-cover rounded-full shadow-md mx-auto">
+                    </a>
+                </div>
 
-            <a href="{{ route('registro.negocio') }}" style="color:#d35400; font-weight:bold; text-decoration:none;">
-                Registrar mi comercio
-            </a>
+                <div class="mb-8 text-center lg:text-left">
+                    <h1 class="text-3xl font-black text-[#032B45] tracking-tight">Acceso al negocio</h1>
+                    <p class="text-slate-500 text-sm mt-1">Ingresá tus credenciales para administrar tu tienda.</p>
+                </div>
+
+                @if ($errors->any())
+                    <div class="bg-red-50 text-red-700 p-4 rounded-2xl mb-6 text-sm border border-red-100 font-medium flex items-center gap-2">
+                        <span>⚠️</span> {{ $errors->first() }}
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('login.submit') }}" class="space-y-5">
+                    @csrf
+
+                    <div>
+                        <label for="email" class="block text-sm font-semibold text-slate-700 mb-2">Correo electrónico</label>
+                        <input id="email" name="email" type="email" value="{{ old('email') }}" required 
+                            class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00A88F] focus:border-transparent transition-all text-slate-800 placeholder-slate-400 bg-slate-50/50"
+                            placeholder="nombre@tucomercio.com">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label for="password" class="block text-sm font-semibold text-slate-700">Contraseña</label>
+                        </div>
+                        <input id="password" name="password" type="password" required 
+                            class="w-full px-4 py-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#00A88F] focus:border-transparent transition-all text-slate-800 bg-slate-50/50"
+                            placeholder="••••••••">
+                    </div>
+
+                    <button type="submit" 
+                        class="w-full bg-[#032B45] hover:bg-[#00A88F] text-white font-extrabold py-3.5 px-4 rounded-xl shadow-lg shadow-[#032B45]/20 hover:shadow-[#00A88F]/30 transition-all duration-300 text-base mt-2">
+                        Ingresar a mi tienda &rarr;
+                    </button>
+                </form>
+
+                <div class="text-center mt-8 pt-6 border-t border-slate-100">
+                    <p class="text-slate-600 text-sm mb-2">
+                        ¿Todavía no tenés una cuenta en Sinergia?
+                    </p>
+                    <a href="{{ route('registro.negocio') }}" class="inline-block text-[#00A88F] hover:text-[#032B45] font-bold text-sm no-underline transition-colors">
+                        Registrar mi comercio ahora
+                    </a>
+                </div>
+
+            </div>
+
         </div>
 
     </div>
