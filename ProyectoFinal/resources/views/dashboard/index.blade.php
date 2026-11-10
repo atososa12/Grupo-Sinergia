@@ -13,11 +13,8 @@
 
 <div class="max-w-7xl mx-auto space-y-6 relative z-10">
 
-
     <header class="bg-white p-6 sm:p-8 rounded-[2.5rem] shadow-2xl flex flex-col sm:flex-row justify-between items-center gap-6">
         <div class="flex items-center gap-5">
-            
-            
             <div class="relative flex-shrink-0">
                 @php
                     $nombreLimpio = strtolower($comercio->nombre);
@@ -61,7 +58,6 @@
         </div>
     </header>
 
- 
     <nav class="bg-white p-2.5 rounded-2xl shadow-xl grid grid-cols-2 md:grid-cols-4 gap-2">
         <button @click="tab = 'pedidos'" :class="tab === 'pedidos' ? 'bg-[#00A88F] text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'" class="py-3.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm transition-all text-center">
             Pedidos recibidos
@@ -77,21 +73,22 @@
         </button>
     </nav>
 
-   
+    <!-- Alerta de éxito con estilo translúcido moderno -->
     @if(session('success'))
-        <div class="bg-emerald-500 text-white p-4 rounded-2xl text-sm font-bold shadow-lg">
-            {{ session('success') }}
+        <div class="bg-[#00A88F]/15 backdrop-blur-md border border-[#00A88F]/40 text-emerald-100 p-4 rounded-2xl text-sm font-bold shadow-xl flex items-center gap-3">
+            <svg class="w-5 h-5 text-[#00A88F] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+            <span>{{ session('success') }}</span>
         </div>
     @endif
 
     @if(session('error'))
-        <div class="bg-rose-500 text-white p-4 rounded-2xl text-sm font-bold shadow-lg">
+        <div class="bg-rose-500/20 backdrop-blur-md border border-rose-500/40 text-rose-100 p-4 rounded-2xl text-sm font-bold shadow-xl">
             {{ session('error') }}
         </div>
     @endif
 
     @if($errors->any())
-        <div class="bg-rose-500 text-white p-4 rounded-2xl text-sm font-bold space-y-1 shadow-lg">
+        <div class="bg-rose-500/20 backdrop-blur-md border border-rose-500/40 text-rose-100 p-4 rounded-2xl text-sm font-bold space-y-1 shadow-xl">
             <ul class="list-disc pl-4">
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -100,10 +97,8 @@
         </div>
     @endif
 
-
     <main class="bg-white p-6 sm:p-10 rounded-[2.5rem] shadow-2xl min-h-[450px]">
 
-        
         <section x-show="tab === 'pedidos'" class="space-y-6">
             <h2 class="text-xl sm:text-2xl font-black text-[#032B45] tracking-tight">Pedidos recibidos</h2>
 
@@ -115,12 +110,23 @@
                 <div>Acción</div>
             </div>
 
-            
             <div class="space-y-4">
                 @forelse($pedidos as $pedido)
+                    @php
+                        $estadoId = $pedido->id_estado;
+                        $estadoClase = match((int)$estadoId) {
+                            1 => 'bg-amber-100 text-amber-800 border-amber-300',      // Pendiente: Amarillo/Ámbar
+                            2 => 'bg-blue-100 text-blue-800 border-blue-300',          // En preparación: Azul
+                            3 => 'bg-emerald-100 text-emerald-800 border-emerald-300', // Listo para entregar: Verde claro
+                            4 => 'bg-green-600 text-white border-green-700',           // Entregado: Verde fuerte
+                            5 => 'bg-rose-100 text-rose-800 border-rose-300',          // Cancelado: Rojo
+                            default => 'bg-white text-slate-900 border-slate-300'
+                        };
+                    @endphp
+
+                    <!-- Tarjeta adaptada a Grid de 5 columnas en lg con items-center -->
                     <div class="bg-slate-300/95 border border-slate-400/80 p-6 rounded-[2rem] shadow-md grid grid-cols-1 lg:grid-cols-5 gap-6 items-center">
-                        
-                        <!-- 1. Pedido -->
+
                         <div class="space-y-1">
                             <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Pedido</span>
                             <span class="text-lg font-black text-[#032B45]">#{{ $pedido->id_pedido }}</span>
@@ -136,15 +142,13 @@
                             </span>
                         </div>
 
-                     
                         <div class="space-y-1">
                             <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Estado</span>
-                            <span class="inline-block px-3 py-1.5 bg-white border border-slate-300 text-slate-900 rounded-xl text-xs font-extrabold shadow-2xs">
+                            <span class="inline-block px-3 py-1.5 border rounded-xl text-xs font-extrabold shadow-2xs {{ $estadoClase }}">
                                 {{ $pedido->estadoPedido?->nombre ?? 'Sin estado' }}
                             </span>
                         </div>
 
-                       
                         <div class="space-y-2 lg:col-span-1" x-data="{ open: false }">
                             <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Información del cliente</span>
                             
@@ -157,7 +161,6 @@
                                 <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                             </button>
 
-        
                             <div 
                                 x-show="open" 
                                 x-transition 
@@ -175,7 +178,6 @@
                             </div>
                         </div>
 
-                       
                         <div class="space-y-2">
                             <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Acción</span>
                             <form method="POST" action="{{ route('dashboard.pedido.estado', $pedido->id_pedido) }}" class="space-y-2 w-full">
