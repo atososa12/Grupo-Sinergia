@@ -23,7 +23,7 @@
                 <div class="flex items-center gap-3">
                     @if(Auth::guard('clientes')->check())
                         <div class="text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 px-4 py-2 rounded-xl">
-                            Hola, <span class="font-bold text-[#032B45]">{{ $cliente->nombre }}</span>
+                         Hola, <span class="font-bold text-[#032B45]">{{ ucwords(mb_strtolower($cliente->nombre)) }}</span>
                         </div>
                         <form method="POST" action="{{ route('cliente.logout') }}">
                             @csrf
@@ -292,7 +292,7 @@
                 cartSummary.innerHTML = lines.join('');
                 itemsInput.value = JSON.stringify(Object.values(cart));
 
-                // Actualizar badge del carrito
+                
                 if (totalItemsCount > 0) {
                     cartBadge.textContent = totalItemsCount;
                     cartBadge.classList.remove('hidden');
@@ -300,7 +300,7 @@
                     cartBadge.classList.add('hidden');
                 }
 
-                // Pequeño feedback visual en el botón al agregar
+                
                 const originalText = this.innerHTML;
                 this.innerHTML = '¡Agregado! ✓';
                 this.classList.remove('bg-[#032B45]');
