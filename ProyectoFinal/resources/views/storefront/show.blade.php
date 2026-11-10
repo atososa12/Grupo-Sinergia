@@ -94,7 +94,7 @@
             </div>
         @endif
 
-        <!-- NAVEGACIÓN DE PESTAÑAS (TABS) -->
+    
         <div class="flex bg-white/10 backdrop-blur-md p-1.5 rounded-2xl border border-white/20 gap-2">
             <button type="button" id="tab-catalogo-btn" onclick="switchTab('catalogo')" class="flex-1 py-3 px-6 rounded-xl font-bold text-sm transition-all duration-300 bg-[#00A88F] text-white shadow-lg">
                 Catálogo de productos

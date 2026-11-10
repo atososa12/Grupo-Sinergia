@@ -14,7 +14,7 @@
       
         <a href="/" class="flex items-center gap-3 no-underline">
            
-            <img src="{{ asset('img/logo-sinergia.png') }}" alt="Logo Sinergia" class="h-10 w-auto object-contain">
+            <img src="{{ asset('img/logo-sinergia.png') }}" alt="Logo Sinergia" class="h-20 w-auto object-contain">
             <span class="text-2xl font-bold text-[#032B45] tracking-tight">Sinergia</span>
         </a>
 
