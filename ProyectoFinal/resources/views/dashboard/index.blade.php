@@ -9,7 +9,7 @@
     
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="bg-[#032B45] text-slate-800 font-sans antialiased min-h-screen p-4 sm:p-6 lg:p-10 relative overflow-x-hidden" x-data="{ tab: 'pedidos' }">
+<body class="bg-[#032B45] text-slate-800 font-sans antialiased min-h-screen p-4 sm:p-6 lg:p-10 relative overflow-x-hidden" x-data="{ tab: localStorage.getItem('admin_tab') || 'pedidos' }" x-init="$watch('tab', val => localStorage.setItem('admin_tab', val))">
 
 <div class="max-w-7xl mx-auto space-y-6 relative z-10">
 
@@ -114,18 +114,17 @@
                     @php
                         $estadoId = $pedido->id_estado;
                         $estadoClase = match((int)$estadoId) {
-                            1 => 'bg-amber-100 text-amber-800 border-amber-300',      // Pendiente: Amarillo
-                            2 => 'bg-blue-100 text-blue-800 border-blue-300',          // En preparación: Azul
-                            3 => 'bg-emerald-100 text-emerald-800 border-emerald-300', // Listo para entregar: Verde claro
-                            4 => 'bg-green-600 text-white border-green-700',           // Entregado: Verde fuerte
-                            5 => 'bg-rose-100 text-rose-800 border-rose-300',          // Cancelado: Rojo
+                            1 => 'bg-amber-100 text-amber-800 border-amber-300',
+                            2 => 'bg-blue-100 text-blue-800 border-blue-300',
+                            3 => 'bg-emerald-100 text-emerald-800 border-emerald-300',
+                            4 => 'bg-green-600 text-white border-green-700',
+                            5 => 'bg-rose-100 text-rose-800 border-rose-300',
                             default => 'bg-white text-slate-900 border-slate-300'
                         };
                     @endphp
 
-           
                     <div class="bg-slate-300/95 border border-slate-400/80 p-6 rounded-[2rem] shadow-md grid grid-cols-1 lg:grid-cols-5 gap-6 items-center">
-
+                        
                         <div class="space-y-1">
                             <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Pedido</span>
                             <span class="text-lg font-black text-[#032B45]">#{{ $pedido->id_pedido }}</span>
@@ -177,6 +176,7 @@
                             </div>
                         </div>
 
+                        <!-- Acción -->
                         <div class="space-y-2">
                             <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Acción</span>
                             <form method="POST" action="{{ route('dashboard.pedido.estado', $pedido->id_pedido) }}" class="space-y-2 w-full">
@@ -201,7 +201,7 @@
             </div>
         </section>
 
-        <section x-show="tab === 'productos'" class="space-y-6" style="display: none;">
+        <section x-show="tab === 'productos'" class="space-y-6">
             <h2 class="text-xl sm:text-2xl font-black text-[#032B45] tracking-tight">Productos actuales</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -213,7 +213,7 @@
                     <div class="bg-slate-300/95 border border-slate-400/80 p-5 rounded-[2rem] flex flex-col justify-between shadow-md space-y-4">
                         <div class="flex items-start gap-4">
                             @if($producto->imagen)
-                                <img src="{{ asset('storage/' . $producto->imagen) }}" alt="{{ $producto->nombre }}" class="w-16 h-16 object-cover rounded-2xl border border-slate-300 shadow-sm flex-shrink-0 bg-white">
+                                <img src="{{ asset($producto->imagen) }}" alt="{{ $producto->nombre }}" class="w-16 h-16 object-cover rounded-2xl border border-slate-300 shadow-sm flex-shrink-0 bg-white">
                             @else
                                 <div class="w-16 h-16 bg-white border border-slate-300 rounded-2xl flex items-center justify-center text-[10px] font-bold text-slate-500 flex-shrink-0">Sin img</div>
                             @endif
@@ -233,7 +233,8 @@
                             <details>
                                 <summary class="text-xs font-bold text-[#00A88F] cursor-pointer hover:underline">Editar producto</summary>
 
-                                <form method="POST" action="{{ route('dashboard.producto.update', $producto->id_producto) }}" enctype="multipart/form-data" class="mt-3 space-y-3 bg-white p-4 rounded-2xl border border-slate-300 text-left shadow-sm">
+                                <!-- FORMULARIO DE EDITAR PRODUCTO (CON BOTÓN DE ARCHIVO MODERNO) -->
+                                <form method="POST" action="{{ route('dashboard.producto.update', $producto->id_producto) }}" enctype="multipart/form-data" class="mt-3 space-y-3 bg-white p-4 rounded-2xl border border-slate-300 text-left shadow-sm" x-data="{ fileName: '' }">
                                     @csrf
                                     @method('PUT')
 
@@ -248,8 +249,12 @@
                                     </div>
 
                                     <div>
-                                        <label class="text-[11px] font-bold text-slate-700 uppercase">Cambiar imagen</label>
-                                        <input type="file" name="imagen" accept="image/*" class="w-full text-xs text-slate-500">
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase block mb-1">Cambiar imagen</label>
+                                        <label class="flex items-center justify-center px-4 py-2 bg-[#032B45] hover:bg-[#00A88F] text-white rounded-xl text-xs font-bold cursor-pointer transition-colors shadow-2xs">
+                                            <span>Seleccionar nueva foto</span>
+                                            <input type="file" name="imagen" accept="image/*" class="hidden" @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''">
+                                        </label>
+                                        <p class="text-[10px] text-slate-500 mt-1 italic truncate" x-text="fileName ? 'Archivo: ' + fileName : 'Ningún archivo nuevo seleccionado'"></p>
                                     </div>
 
                                     <div class="grid grid-cols-2 gap-2">
@@ -284,11 +289,11 @@
             </div>
         </section>
 
-        <section x-show="tab === 'agregar'" class="space-y-6 max-w-xl mx-auto" style="display: none;">
+        <section x-show="tab === 'agregar'" class="space-y-6 max-w-xl mx-auto">
             <div class="bg-slate-300/95 p-6 sm:p-8 rounded-[2.5rem] shadow-md border border-slate-400/80 space-y-6">
                 <h2 class="text-xl sm:text-2xl font-black text-[#032B45] tracking-tight">Agregar producto nuevo</h2>
 
-                <form method="POST" action="{{ route('dashboard.producto.store') }}" enctype="multipart/form-data" class="space-y-4">
+                <form method="POST" action="{{ route('dashboard.producto.store') }}" enctype="multipart/form-data" class="space-y-4" x-data="{ fileName: '' }">
                     @csrf
                     <div>
                         <label class="text-xs font-bold text-slate-700 uppercase tracking-wider pl-1">Nombre del producto</label>
@@ -301,8 +306,12 @@
                     </div>
 
                     <div>
-                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider pl-1">Imagen del producto</label>
-                        <input type="file" name="imagen" accept="image/*" class="w-full bg-white border border-slate-300 rounded-2xl px-4 py-2 text-sm text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#032B45] file:text-white hover:file:bg-[#00A88F]">
+                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider pl-1 block mb-1">Imagen del producto</label>
+                        <label class="flex items-center justify-center w-full px-4 py-3 bg-white hover:bg-slate-50 border border-slate-300 text-[#032B45] rounded-2xl text-sm font-bold cursor-pointer transition-all shadow-2xs">
+                            <span>Elegir imagen del producto</span>
+                            <input type="file" name="imagen" accept="image/*" class="hidden" @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''">
+                        </label>
+                        <p class="text-xs text-slate-600 mt-1.5 pl-1 italic" x-text="fileName ? 'Archivo seleccionado: ' + fileName : 'Ningún archivo seleccionado'"></p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -323,7 +332,7 @@
             </div>
         </section>
 
-        <section x-show="tab === 'configuracion'" class="space-y-6 max-w-xl mx-auto" style="display: none;">
+        <section x-show="tab === 'configuracion'" class="space-y-6 max-w-xl mx-auto">
             <div class="bg-slate-300/95 p-6 sm:p-8 rounded-[2.5rem] shadow-md border border-slate-400/80 space-y-6">
                 <h2 class="text-xl sm:text-2xl font-black text-[#032B45] tracking-tight">Configuración del negocio</h2>
 

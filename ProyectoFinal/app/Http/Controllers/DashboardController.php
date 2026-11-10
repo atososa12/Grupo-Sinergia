@@ -9,6 +9,7 @@ use App\Models\TipoPrecio;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Database\QueryException;
 use Illuminate\Validation\ValidationException;
 
@@ -47,6 +48,7 @@ class DashboardController extends Controller
             'descripcion' => ['nullable', 'string'],
             'stock' => ['required', 'integer', 'min:0'],
             'precio' => ['required', 'numeric', 'min:0'],
+            'imagen' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ]);
 
         $usuario = Auth::user();
@@ -56,11 +58,30 @@ class DashboardController extends Controller
             abort(403, 'Este usuario no tiene un comercio asociado.');
         }
 
+        $rutaImagen = null;
+
+        if ($request->hasFile('imagen')) {
+            $archivo = $request->file('imagen');
+            $nombreCarpeta = Str::slug($comercio->nombre);
+            $nombreArchivo = time() . '_' . Str::slug($request->nombre) . '.' . $archivo->getClientOriginalExtension();
+            
+            $destino = public_path("img/{$nombreCarpeta}");
+            
+            if (!file_exists($destino)) {
+                mkdir($destino, 0755, true);
+            }
+            
+            $archivo->move($destino, $nombreArchivo);
+            
+            $rutaImagen = "img/{$nombreCarpeta}/{$nombreArchivo}";
+        }
+
         $producto = Producto::create([
             'nombre' => $request->input('nombre'),
             'descripcion' => $request->input('descripcion'),
             'disponible' => true,
             'stock' => (int) $request->input('stock'),
+            'imagen' => $rutaImagen, // Guardamos la ruta del archivo
             'id_comercio' => $comercio->id_comercio,
         ]);
 
@@ -92,6 +113,7 @@ class DashboardController extends Controller
             'descripcion' => ['nullable', 'string'],
             'stock' => ['required', 'integer', 'min:0'],
             'precio' => ['required', 'numeric', 'min:0'],
+            'imagen' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ]);
 
         $comercio = Auth::user()?->comercio;
@@ -104,24 +126,44 @@ class DashboardController extends Controller
             ->where('id_producto', $idProducto)
             ->firstOrFail();
 
-        DB::transaction(function () use ($request, $producto) {
+        DB::transaction(function () use ($request, $producto, $comercio) {
 
-            $producto->update([
+            $datosActualizar = [
                 'nombre' => $request->input('nombre'),
                 'descripcion' => $request->input('descripcion'),
                 'stock' => (int) $request->input('stock'),
-            ]);
+            ];
+
+            // Si suben una nueva imagen al editar
+            if ($request->hasFile('imagen')) {
+                // Opcional: borrar la imagen anterior si existía para no acumular basura
+                if ($producto->imagen && file_exists(public_path($producto->imagen))) {
+                    @unlink(public_path($producto->imagen));
+                }
+
+                $archivo = $request->file('imagen');
+                $nombreCarpeta = Str::slug($comercio->nombre);
+                $nombreArchivo = time() . '_' . Str::slug($request->input('nombre')) . '.' . $archivo->getClientOriginalExtension();
+                
+                $destino = public_path("img/{$nombreCarpeta}");
+                
+                if (!file_exists($destino)) {
+                    mkdir($destino, 0755, true);
+                }
+                
+                $archivo->move($destino, $nombreArchivo);
+                $datosActualizar['imagen'] = "img/{$nombreCarpeta}/{$nombreArchivo}";
+            }
+
+            $producto->update($datosActualizar);
 
             $precioProducto = $producto->precios()->first();
 
             if ($precioProducto) {
-
                 $precioProducto->update([
                     'precio' => $request->input('precio'),
                 ]);
-
             } else {
-
                 $tipoPrecio = TipoPrecio::where('activo', true)
                     ->orderBy('id_tipo_precio')
                     ->first();
@@ -158,14 +200,17 @@ class DashboardController extends Controller
             ->firstOrFail();
 
         try {
-
             DB::transaction(function () use ($producto) {
+                // Borrar archivo físico de imagen si existe al eliminar el producto
+                if ($producto->imagen && file_exists(public_path($producto->imagen))) {
+                    @unlink(public_path($producto->imagen));
+                }
+
                 $producto->precios()->delete();
                 $producto->delete();
             });
 
         } catch (QueryException $e) {
-
             return back()->with(
                 'error',
                 'No se pudo eliminar el producto. Puede estar asociado a pedidos existentes.'
@@ -212,11 +257,9 @@ class DashboardController extends Controller
             }
 
             if ($nuevoEstado === 5) {
-
                 $pedidoActual->load('detalles');
 
                 foreach ($pedidoActual->detalles as $detalle) {
-
                     $producto = Producto::where(
                         'id_producto',
                         $detalle->id_producto
@@ -233,7 +276,6 @@ class DashboardController extends Controller
 
             $pedidoActual->id_estado = $nuevoEstado;
             $pedidoActual->save();
-
         });
 
         return redirect()
