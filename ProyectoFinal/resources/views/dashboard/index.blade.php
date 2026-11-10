@@ -73,7 +73,6 @@
         </button>
     </nav>
 
-    <!-- Alerta de éxito con estilo translúcido moderno -->
     @if(session('success'))
         <div class="bg-[#00A88F]/15 backdrop-blur-md border border-[#00A88F]/40 text-emerald-100 p-4 rounded-2xl text-sm font-bold shadow-xl flex items-center gap-3">
             <svg class="w-5 h-5 text-[#00A88F] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
@@ -115,7 +114,7 @@
                     @php
                         $estadoId = $pedido->id_estado;
                         $estadoClase = match((int)$estadoId) {
-                            1 => 'bg-amber-100 text-amber-800 border-amber-300',      // Pendiente: Amarillo/Ámbar
+                            1 => 'bg-amber-100 text-amber-800 border-amber-300',      // Pendiente: Amarillo
                             2 => 'bg-blue-100 text-blue-800 border-blue-300',          // En preparación: Azul
                             3 => 'bg-emerald-100 text-emerald-800 border-emerald-300', // Listo para entregar: Verde claro
                             4 => 'bg-green-600 text-white border-green-700',           // Entregado: Verde fuerte
@@ -124,7 +123,7 @@
                         };
                     @endphp
 
-                    <!-- Tarjeta adaptada a Grid de 5 columnas en lg con items-center -->
+           
                     <div class="bg-slate-300/95 border border-slate-400/80 p-6 rounded-[2rem] shadow-md grid grid-cols-1 lg:grid-cols-5 gap-6 items-center">
 
                         <div class="space-y-1">
