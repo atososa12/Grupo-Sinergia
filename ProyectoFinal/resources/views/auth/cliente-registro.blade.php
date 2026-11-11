@@ -14,12 +14,12 @@
     <div class="w-full max-w-lg relative z-10 my-8">
 
         <div class="relative bg-[#021826]/85 backdrop-blur-xl p-6 sm:p-10 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-white/10 text-center space-y-6">
-            
+
             <div class="-mt-16 sm:-mt-20 flex justify-center">
                 <div class="relative inline-block">
-                    <img 
-                        src="{{ asset('img/logo-sinergia.png') }}" 
-                        alt="Logo Sinergia" 
+                    <img
+                        src="{{ asset('storage/img/logo-sinergia.png') }}"
+                        alt="Logo Sinergia"
                         class="h-24 w-24 sm:h-28 sm:w-28 rounded-full object-cover p-1 bg-[#021826] shadow-2xl ring-4 ring-[#00A88F] ring-offset-4 ring-offset-[#032B45]"
                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                     >
@@ -52,10 +52,10 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div class="space-y-1">
                         <label class="text-[11px] font-bold text-slate-300 uppercase tracking-widest pl-1">Nombre</label>
-                        <input 
-                            type="text" 
-                            name="nombre" 
-                            value="{{ old('nombre') }}" 
+                        <input
+                            type="text"
+                            name="nombre"
+                            value="{{ old('nombre') }}"
                             required
                             class="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-4 py-3 text-sm font-semibold text-white placeholder-slate-400 focus:outline-none focus:border-[#00A88F] focus:ring-2 focus:ring-[#00A88F]/30 transition-all"
                             placeholder="Tu nombre"
@@ -64,10 +64,10 @@
 
                     <div class="space-y-1">
                         <label class="text-[11px] font-bold text-slate-300 uppercase tracking-widest pl-1">Apellido</label>
-                        <input 
-                            type="text" 
-                            name="apellido" 
-                            value="{{ old('apellido') }}" 
+                        <input
+                            type="text"
+                            name="apellido"
+                            value="{{ old('apellido') }}"
                             required
                             class="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-4 py-3 text-sm font-semibold text-white placeholder-slate-400 focus:outline-none focus:border-[#00A88F] focus:ring-2 focus:ring-[#00A88F]/30 transition-all"
                             placeholder="Tu apellido"
@@ -78,10 +78,10 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div class="space-y-1">
                         <label class="text-[11px] font-bold text-slate-300 uppercase tracking-widest pl-1">Teléfono</label>
-                        <input 
-                            type="text" 
-                            name="telefono" 
-                            value="{{ old('telefono') }}" 
+                        <input
+                            type="text"
+                            name="telefono"
+                            value="{{ old('telefono') }}"
                             required
                             class="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-4 py-3 text-sm font-semibold text-white placeholder-slate-400 focus:outline-none focus:border-[#00A88F] focus:ring-2 focus:ring-[#00A88F]/30 transition-all"
                             placeholder="Ej: 1123456789"
@@ -90,10 +90,10 @@
 
                     <div class="space-y-1">
                         <label class="text-[11px] font-bold text-slate-300 uppercase tracking-widest pl-1">Correo electrónico</label>
-                        <input 
-                            type="email" 
-                            name="email" 
-                            value="{{ old('email') }}" 
+                        <input
+                            type="email"
+                            name="email"
+                            value="{{ old('email') }}"
                             required
                             class="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-4 py-3 text-sm font-semibold text-white placeholder-slate-400 focus:outline-none focus:border-[#00A88F] focus:ring-2 focus:ring-[#00A88F]/30 transition-all"
                             placeholder="tu@email.com"
@@ -104,9 +104,9 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <div class="space-y-1">
                         <label class="text-[11px] font-bold text-slate-300 uppercase tracking-widest pl-1">Contraseña</label>
-                        <input 
-                            type="password" 
-                            name="password" 
+                        <input
+                            type="password"
+                            name="password"
                             required
                             class="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-4 py-3 text-sm font-semibold text-white placeholder-slate-400 focus:outline-none focus:border-[#00A88F] focus:ring-2 focus:ring-[#00A88F]/30 transition-all"
                             placeholder="••••••••"
@@ -115,9 +115,9 @@
 
                     <div class="space-y-1">
                         <label class="text-[11px] font-bold text-slate-300 uppercase tracking-widest pl-1">Confirmar contraseña</label>
-                        <input 
-                            type="password" 
-                            name="password_confirmation" 
+                        <input
+                            type="password"
+                            name="password_confirmation"
                             required
                             class="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-4 py-3 text-sm font-semibold text-white placeholder-slate-400 focus:outline-none focus:border-[#00A88F] focus:ring-2 focus:ring-[#00A88F]/30 transition-all"
                             placeholder="••••••••"
@@ -132,7 +132,7 @@
 
             <div class="pt-4 border-t border-white/10 text-center">
                 <p class="text-xs text-slate-300 font-medium">
-                    ¿Ya tenés una cuenta? 
+                    ¿Ya tenés una cuenta?
                     <a href="{{ route('cliente.login', request()->only('comercio')) }}" class="font-bold text-[#00A88F] hover:underline">
                         Iniciá sesión
                     </a>

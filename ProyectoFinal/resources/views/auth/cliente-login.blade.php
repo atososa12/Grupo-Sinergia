@@ -14,14 +14,14 @@
     <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-sky-500/10 rounded-full blur-[180px] pointer-events-none"></div>
 
     <div class="w-full max-w-4xl bg-white/95 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2 min-h-[520px] relative z-10 border border-white/20">
-        
+
         <div class="bg-[#011624] text-white p-8 sm:p-10 flex flex-col justify-between relative overflow-hidden">
-            
+
             <div class="relative z-10 space-y-6">
                 <div class="flex items-center gap-4">
-                    <img 
-                        src="{{ asset('img/logo-sinergia.png') }}" 
-                        alt="Logo Sinergia" 
+                    <img
+                        src="{{ asset('storage/img/logo-sinergia.png') }}"
+                        alt="Logo Sinergia"
                         class="h-20 w-20 rounded-full object-cover p-1 bg-white shadow-xl border-2 border-[#00A88F]"
                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                     >
@@ -64,10 +64,10 @@
 
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Correo electrónico</label>
-                    <input 
-                        type="email" 
-                        name="email" 
-                        value="{{ old('email') }}" 
+                    <input
+                        type="email"
+                        name="email"
+                        value="{{ old('email') }}"
                         required
                         class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#00A88F]"
                         placeholder="tu@email.com"
@@ -76,9 +76,9 @@
 
                 <div class="space-y-1">
                     <label class="text-xs font-bold text-slate-700 uppercase tracking-wider">Contraseña</label>
-                    <input 
-                        type="password" 
-                        name="password" 
+                    <input
+                        type="password"
+                        name="password"
                         required
                         class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#00A88F]"
                         placeholder="••••••••"
@@ -92,7 +92,7 @@
 
             <div class="text-center pt-2 border-t border-slate-200">
                 <p class="text-xs text-slate-600 font-medium">
-                    ¿Todavía no tenés cuenta? 
+                    ¿Todavía no tenés cuenta?
                     <a href="{{ route('cliente.registro', request()->only('comercio')) }}" class="font-bold text-[#00A88F] hover:underline">
                         Registrate
                     </a>

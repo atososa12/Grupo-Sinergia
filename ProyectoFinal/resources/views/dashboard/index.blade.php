@@ -6,7 +6,7 @@
     <title>Panel de Administración - {{ $comercio->nombre }}</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="bg-[#032B45] text-slate-800 font-sans antialiased min-h-screen p-4 sm:p-6 lg:p-10 relative overflow-x-hidden" x-data="{ tab: localStorage.getItem('admin_tab') || 'pedidos' }" x-init="$watch('tab', val => localStorage.setItem('admin_tab', val))">
@@ -18,21 +18,22 @@
             <div class="relative flex-shrink-0">
                 @php
                     $nombreLimpio = strtolower($comercio->nombre);
-                    $logoRuta = asset('img/logo-sinergia.png');
+                    $logoRuta = asset('storage/img/logo-sinergia.png');
 
                     if (str_contains($nombreLimpio, 'cuarta')) {
-                        $logoRuta = asset('img/la-cuarta-masa/logo-la-cuarta-masa.png');
+                        $logoRuta = asset('storage/img/la-cuarta-masa/logo-la-cuarta-masa.png');
                     } elseif (str_contains($nombreLimpio, 'don pepe')) {
-                        $logoRuta = asset('img/don-pepe/logo-don-pepe.png');
+                        $logoRuta = asset('storage/img/don-pepe/logo-don-pepe.png');
                     }
                 @endphp
 
-                <img 
-                    src="{{ $logoRuta }}" 
-                    alt="Logo {{ $comercio->nombre }}" 
+                <img
+                    src="{{ $logoRuta }}"
+                    alt="Logo {{ $comercio->nombre }}"
                     class="h-24 w-24 sm:h-28 sm:w-28 rounded-full object-cover p-1 bg-white shadow-xl ring-4 ring-[#00A88F]"
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                 >
+
                 <div class="h-24 w-24 sm:h-28 sm:w-28 bg-[#00A88F] text-white font-black rounded-full items-center justify-center text-3xl shadow-xl ring-4 ring-[#032B45] hidden">
                     {{ strtoupper(substr($comercio->nombre, 0, 2)) }}
                 </div>
@@ -124,7 +125,7 @@
                     @endphp
 
                     <div class="bg-slate-300/95 border border-slate-400/80 p-6 rounded-[2rem] shadow-md grid grid-cols-1 lg:grid-cols-5 gap-6 items-center">
-                        
+
                         <div class="space-y-1">
                             <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Pedido</span>
                             <span class="text-lg font-black text-[#032B45]">#{{ $pedido->id_pedido }}</span>
@@ -149,9 +150,9 @@
 
                         <div class="space-y-2 lg:col-span-1" x-data="{ open: false }">
                             <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Información del cliente</span>
-                            
-                            <button 
-                                @click="open = !open" 
+
+                            <button
+                                @click="open = !open"
                                 type="button"
                                 class="w-full text-xs font-bold text-[#032B45] hover:text-[#00A88F] bg-white px-4 py-2.5 rounded-xl border border-slate-300 shadow-2xs inline-flex items-center justify-between transition-colors"
                             >
@@ -159,9 +160,9 @@
                                 <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                             </button>
 
-                            <div 
-                                x-show="open" 
-                                x-transition 
+                            <div
+                                x-show="open"
+                                x-transition
                                 style="display: none;"
                                 class="w-full bg-white rounded-2xl p-3.5 border border-slate-300 shadow-inner text-xs space-y-1.5 text-slate-800"
                             >
@@ -176,7 +177,6 @@
                             </div>
                         </div>
 
-                        <!-- Acción -->
                         <div class="space-y-2">
                             <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Acción</span>
                             <form method="POST" action="{{ route('dashboard.pedido.estado', $pedido->id_pedido) }}" class="space-y-2 w-full">
@@ -208,14 +208,27 @@
                 @forelse($productos as $producto)
                     @php
                         $precio = $producto->precios->first();
+                        $imagenProducto = $producto->imagen
+                            ? asset('storage/' . ltrim($producto->imagen, '/'))
+                            : null;
                     @endphp
 
                     <div class="bg-slate-300/95 border border-slate-400/80 p-5 rounded-[2rem] flex flex-col justify-between shadow-md space-y-4">
                         <div class="flex items-start gap-4">
-                            @if($producto->imagen)
-                                <img src="{{ asset($producto->imagen) }}" alt="{{ $producto->nombre }}" class="w-16 h-16 object-cover rounded-2xl border border-slate-300 shadow-sm flex-shrink-0 bg-white">
+                            @if($imagenProducto)
+                                <img
+                                    src="{{ $imagenProducto }}"
+                                    alt="{{ $producto->nombre }}"
+                                    class="w-16 h-16 object-cover rounded-2xl border border-slate-300 shadow-sm flex-shrink-0 bg-white"
+                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                >
+                                <div class="w-16 h-16 bg-white border border-slate-300 rounded-2xl items-center justify-center text-[10px] font-bold text-slate-500 flex-shrink-0 hidden">
+                                    Sin img
+                                </div>
                             @else
-                                <div class="w-16 h-16 bg-white border border-slate-300 rounded-2xl flex items-center justify-center text-[10px] font-bold text-slate-500 flex-shrink-0">Sin img</div>
+                                <div class="w-16 h-16 bg-white border border-slate-300 rounded-2xl flex items-center justify-center text-[10px] font-bold text-slate-500 flex-shrink-0">
+                                    Sin img
+                                </div>
                             @endif
 
                             <div class="flex-1 min-w-0">
@@ -233,7 +246,6 @@
                             <details>
                                 <summary class="text-xs font-bold text-[#00A88F] cursor-pointer hover:underline">Editar producto</summary>
 
-                                <!-- FORMULARIO DE EDITAR PRODUCTO (CON BOTÓN DE ARCHIVO MODERNO) -->
                                 <form method="POST" action="{{ route('dashboard.producto.update', $producto->id_producto) }}" enctype="multipart/form-data" class="mt-3 space-y-3 bg-white p-4 rounded-2xl border border-slate-300 text-left shadow-sm" x-data="{ fileName: '' }">
                                     @csrf
                                     @method('PUT')

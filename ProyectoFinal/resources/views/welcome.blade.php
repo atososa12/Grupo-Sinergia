@@ -13,13 +13,13 @@
     <div id="splash-screen" class="fixed inset-0 z-[100] bg-slate-900 flex items-center justify-center transition-opacity duration-700 ease-in-out px-4">
         <div class="relative flex items-center justify-center p-6">
        
-           <img src="{{ asset('img/logo-sinergia.png') }}" alt="Logo Sinergia" class="w-64 h-64 sm:w-96 sm:h-96 rounded-full object-cover shadow-[0_0_90px_rgba(0,168,143,0.7)] ring-4 ring-[#00A88F]/60 drop-shadow-2xl animate-bounce">
+           <img src="{{ asset('storage/img/logo-sinergia.png') }}" alt="Logo Sinergia" class="w-64 h-64 sm:w-96 sm:h-96 rounded-full object-cover shadow-[0_0_90px_rgba(0,168,143,0.7)] ring-4 ring-[#00A88F]/60 drop-shadow-2xl animate-bounce">
         </div>
     </div>
 
     <header class="bg-white border-b border-slate-200 px-6 sm:px-12 py-5 flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-50">
         <a href="/" class="flex items-center gap-3 no-underline group">
-            <img src="{{ asset('img/logo-sinergia.png') }}" alt="Logo Sinergia" class="h-16 sm:h-20 w-auto object-contain transition-transform group-hover:scale-105">
+            <img src="{{ asset('storage/img/logo-sinergia.png') }}" alt="Logo Sinergia" class="h-16 sm:h-20 w-auto object-contain transition-transform group-hover:scale-105">
             <span class="text-2xl font-bold text-[#032B45] tracking-tight">Sinergia</span>
         </a>
 
@@ -131,7 +131,7 @@
                 setTimeout(() => {
                     splash.classList.add('hidden');
                 }, 700);
-            }, 1800);
+            }, 4000);
         });
     </script>
 

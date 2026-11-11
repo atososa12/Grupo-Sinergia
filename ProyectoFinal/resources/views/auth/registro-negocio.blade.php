@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de negocio</title>
+    <title>Registro de negocio - Sinergia</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
@@ -13,10 +13,10 @@
     <div class="absolute -bottom-24 -right-24 w-96 h-96 bg-[#00A88F]/20 rounded-full blur-[100px] pointer-events-none"></div>
 
     <div class="w-full max-w-xl bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-2xl shadow-2xl shadow-slate-950/50 border border-white/20 relative z-10 my-auto">
-        
+
         <div class="text-center mb-6">
             <a href="/" class="inline-block mb-3">
-                <img src="{{ asset('img/logo-sinergia.png') }}" alt="Logo Sinergia" class="h-24 w-24 object-cover rounded-full shadow-lg mx-auto">
+                <img src="{{ asset('storage/img/logo-sinergia.png') }}" alt="Logo Sinergia" class="h-24 w-24 object-cover rounded-full shadow-lg mx-auto">
             </a>
             <h1 class="text-2xl font-black text-[#032B45] tracking-tight">Registrar mi negocio</h1>
         </div>
@@ -90,7 +90,7 @@
                 </div>
             </div>
 
-            <button type="submit" 
+            <button type="submit"
                 class="w-full bg-[#032B45] hover:bg-[#00A88F] text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all duration-300 text-sm mt-2">
                 Crear negocio y entrar al panel &rarr;
             </button>
