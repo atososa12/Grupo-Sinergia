@@ -131,7 +131,7 @@
                 setTimeout(() => {
                     splash.classList.add('hidden');
                 }, 700);
-            }, 4000);
+            }, 1800);
         });
     </script>
 
