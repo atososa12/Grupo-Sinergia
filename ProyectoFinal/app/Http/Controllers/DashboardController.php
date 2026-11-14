@@ -6,6 +6,7 @@ use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\ProductoPrecio;
 use App\Models\TipoPrecio;
+use App\Models\NotificacionComercio;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -30,16 +31,73 @@ class DashboardController extends Controller
             ->latest('id_producto')
             ->get();
 
+        $hoy = now()->toDateString();
+
         $pedidos = Pedido::with([
             'detalles.producto',
             'estadoPedido',
             'cliente',
         ])
             ->where('id_comercio', $comercio->id_comercio)
-            ->latest('id_pedido')
+            ->whereDate('fecha', $hoy)
+            ->latest('fecha')
             ->get();
 
-        return view('dashboard.index', compact('comercio', 'productos', 'pedidos'));
+        $pedidosAnteriores = Pedido::with([
+            'detalles.producto',
+            'estadoPedido',
+            'cliente',
+        ])
+            ->where('id_comercio', $comercio->id_comercio)
+            ->whereDate('fecha', '<', $hoy)
+            ->latest('fecha')
+            ->get();
+
+        $pedidosPorDia = $pedidosAnteriores
+            ->groupBy(fn ($pedido) => $pedido->fecha?->format('Y-m-d'))
+            ->sortKeysDesc();
+
+        $notificaciones = NotificacionComercio::where(
+            'id_comercio',
+            $comercio->id_comercio
+        )
+            ->orderByDesc('fecha_creacion')
+            ->get();
+
+        $notificacionesNuevas = $notificaciones
+            ->where('leida', false);
+
+        return view('dashboard.index', compact(
+            'comercio',
+            'productos',
+            'pedidos',
+            'pedidosPorDia',
+            'notificaciones',
+            'notificacionesNuevas'
+        ));
+    }
+
+    public function marcarNotificacionLeida($idNotificacion)
+    {
+        $comercio = Auth::user()?->comercio;
+
+        if (! $comercio) {
+            abort(403, 'Este usuario no tiene un comercio asociado.');
+        }
+
+        $notificacion = NotificacionComercio::where(
+            'id_notificacion',
+            $idNotificacion
+        )
+            ->where('id_comercio', $comercio->id_comercio)
+            ->firstOrFail();
+
+        $notificacion->leida = true;
+        $notificacion->save();
+
+        return redirect()
+            ->route('dashboard')
+            ->with('success', 'Notificación marcada como leída.');
     }
 
     public function storeProducto(Request $request)
@@ -245,6 +303,12 @@ class DashboardController extends Controller
             if ($estadoActual === 5 && $nuevoEstado !== 5) {
                 throw ValidationException::withMessages([
                     'id_estado' => 'Un pedido cancelado no puede volver a otro estado.',
+                ]);
+            }
+
+            if ($estadoActual === 4 && $nuevoEstado === 5) {
+                throw ValidationException::withMessages([
+                    'id_estado' => 'Un pedido entregado no puede ser cancelado.',
                 ]);
             }
 

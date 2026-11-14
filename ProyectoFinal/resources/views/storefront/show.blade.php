@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -20,11 +21,16 @@
                     &larr; Volver a comercios
                 </a>
 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-3 flex-wrap">
                     @if(Auth::guard('clientes')->check())
                         <div class="text-xs sm:text-sm font-semibold text-slate-700 bg-slate-100 px-4 py-2 rounded-xl">
                             Hola, <span class="font-bold text-[#032B45]">{{ ucwords(mb_strtolower($cliente->nombre)) }}</span>
                         </div>
+
+                        <a href="{{ route('cliente.pedidos') }}" class="bg-[#00A88F] hover:bg-[#032B45] text-white text-xs font-bold py-2 px-4 rounded-xl transition-all duration-300">
+                            Mis pedidos
+                        </a>
+
                         <form method="POST" action="{{ route('cliente.logout') }}">
                             @csrf
                             <button type="submit" class="bg-rose-500/10 hover:bg-rose-500 text-rose-600 hover:text-white text-xs font-bold py-2 px-4 rounded-xl transition-all duration-300">

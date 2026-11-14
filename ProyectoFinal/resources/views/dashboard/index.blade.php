@@ -1,12 +1,11 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración - {{ $comercio->nombre }}</title>
-
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="bg-[#032B45] text-slate-800 font-sans antialiased min-h-screen p-4 sm:p-6 lg:p-10 relative overflow-x-hidden" x-data="{ tab: localStorage.getItem('admin_tab') || 'pedidos' }" x-init="$watch('tab', val => localStorage.setItem('admin_tab', val))">
@@ -27,13 +26,7 @@
                     }
                 @endphp
 
-                <img
-                    src="{{ $logoRuta }}"
-                    alt="Logo {{ $comercio->nombre }}"
-                    class="h-24 w-24 sm:h-28 sm:w-28 rounded-full object-cover p-1 bg-white shadow-xl ring-4 ring-[#00A88F]"
-                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                >
-
+                <img src="{{ $logoRuta }}" alt="Logo {{ $comercio->nombre }}" class="h-24 w-24 sm:h-28 sm:w-28 rounded-full object-cover p-1 bg-white shadow-xl ring-4 ring-[#00A88F]" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="h-24 w-24 sm:h-28 sm:w-28 bg-[#00A88F] text-white font-black rounded-full items-center justify-center text-3xl shadow-xl ring-4 ring-[#032B45] hidden">
                     {{ strtoupper(substr($comercio->nombre, 0, 2)) }}
                 </div>
@@ -49,7 +42,6 @@
             <a href="{{ route('comercio.show', $comercio->id_comercio) }}" class="flex-1 sm:flex-none bg-[#00A88F] hover:bg-[#008f7a] text-white font-extrabold px-6 py-3.5 rounded-2xl shadow-lg shadow-[#00A88F]/20 transition-all text-sm text-center">
                 Ver mi tienda &rarr;
             </a>
-
             <form method="POST" action="{{ route('logout') }}" class="flex-1 sm:flex-none">
                 @csrf
                 <button type="submit" class="w-full bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 font-bold px-5 py-3.5 rounded-2xl border border-slate-200 transition-all text-sm">
@@ -59,18 +51,30 @@
         </div>
     </header>
 
-    <nav class="bg-white p-2.5 rounded-2xl shadow-xl grid grid-cols-2 md:grid-cols-4 gap-2">
+    <nav class="bg-white p-2.5 rounded-2xl shadow-xl grid grid-cols-2 md:grid-cols-5 gap-2">
         <button @click="tab = 'pedidos'" :class="tab === 'pedidos' ? 'bg-[#00A88F] text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'" class="py-3.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm transition-all text-center">
             Pedidos recibidos
         </button>
+
         <button @click="tab = 'productos'" :class="tab === 'productos' ? 'bg-[#00A88F] text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'" class="py-3.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm transition-all text-center">
             Productos actuales
         </button>
+
         <button @click="tab = 'agregar'" :class="tab === 'agregar' ? 'bg-[#00A88F] text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'" class="py-3.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm transition-all text-center">
             Agregar productos
         </button>
+
         <button @click="tab = 'configuracion'" :class="tab === 'configuracion' ? 'bg-[#00A88F] text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'" class="py-3.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm transition-all text-center">
             Configuración
+        </button>
+
+        <button @click="tab = 'notificaciones'" :class="tab === 'notificaciones' ? 'bg-[#00A88F] text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'" class="py-3.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm transition-all text-center flex items-center justify-center gap-2">
+            Notificaciones
+            @if($notificacionesNuevas->count() > 0)
+                <span class="bg-rose-500 text-white text-[10px] font-black rounded-full min-w-5 h-5 px-1.5 flex items-center justify-center">
+                    {{ $notificacionesNuevas->count() }}
+                </span>
+            @endif
         </button>
     </nav>
 
@@ -99,8 +103,134 @@
 
     <main class="bg-white p-6 sm:p-10 rounded-[2.5rem] shadow-2xl min-h-[450px]">
 
-        <section x-show="tab === 'pedidos'" class="space-y-6">
-            <h2 class="text-xl sm:text-2xl font-black text-[#032B45] tracking-tight">Pedidos recibidos</h2>
+        <section x-show="tab === 'notificaciones'" x-cloak class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-black text-[#032B45] tracking-tight">Notificaciones</h2>
+                    <p class="text-sm text-slate-500 font-medium mt-1">Avisos sobre los pagos y la suscripción de tu comercio.</p>
+                </div>
+
+                <div class="bg-[#00A88F]/10 text-[#008f7a] border border-[#00A88F]/30 rounded-xl px-4 py-2 text-xs font-extrabold">
+                    {{ $notificacionesNuevas->count() }} nuevas
+                </div>
+            </div>
+
+            @forelse($notificaciones as $notificacion)
+                @php
+                    $esAprobada = $notificacion->tipo === 'pago_aprobado';
+
+                    $claseNotificacion = $esAprobada
+                        ? 'border-emerald-300 bg-emerald-50'
+                        : 'border-rose-300 bg-rose-50';
+
+                    $colorIcono = $esAprobada
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-rose-100 text-rose-700';
+                @endphp
+
+                <div class="border {{ $claseNotificacion }} rounded-2xl p-5 sm:p-6 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-start gap-4">
+
+                        <div class="w-12 h-12 rounded-2xl {{ $colorIcono }} flex items-center justify-center flex-shrink-0">
+                            @if($esAprobada)
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            @else
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            @endif
+                        </div>
+
+                        <div class="flex-1 min-w-0 space-y-2">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h3 class="font-black text-[#032B45]">
+                                    {{ $notificacion->titulo }}
+                                </h3>
+
+                                @if(!$notificacion->leida)
+                                    <span class="bg-[#00A88F] text-white text-[10px] uppercase tracking-wider font-black px-2.5 py-1 rounded-full">
+                                        Nueva
+                                    </span>
+                                @else
+                                    <span class="bg-slate-200 text-slate-600 text-[10px] uppercase tracking-wider font-black px-2.5 py-1 rounded-full">
+                                        Leída
+                                    </span>
+                                @endif
+                            </div>
+
+                            <p class="text-sm text-slate-700 leading-relaxed">
+                                {{ $notificacion->mensaje }}
+                            </p>
+
+                            <p class="text-xs text-slate-500 font-semibold">
+                                {{ $notificacion->fecha_creacion?->format('d/m/Y H:i') ?? 'Fecha no disponible' }}
+                            </p>
+
+                            @if(!$notificacion->leida)
+                                <form method="POST" action="{{ route('dashboard.notificacion.leida', $notificacion->id_notificacion) }}">
+                                    @csrf
+                                    <button type="submit" class="inline-flex items-center gap-2 bg-[#032B45] hover:bg-[#00A88F] text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-colors shadow-sm mt-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                        Marcar como leída
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="text-center py-16 bg-slate-50 border border-slate-200 rounded-[2rem]">
+                    <div class="w-16 h-16 mx-auto bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-black text-[#032B45]">Todavía no tenés notificaciones</h3>
+                    <p class="text-sm text-slate-500 mt-2">Acá vas a recibir los avisos sobre tus transferencias y suscripción.</p>
+                </div>
+            @endforelse
+        </section>
+
+        <section x-data="{ fechaSeleccionada: '{{ now()->toDateString() }}', historialAbierto: false, etiquetaPedidos: 'Pedidos del día: {{ $pedidos->count() }}' }" x-show="tab === 'pedidos'" class="space-y-6">
+            @php
+                $hoy = now()->toDateString();
+                $pedidosPorFecha = collect([$hoy => $pedidos])->merge($pedidosPorDia);
+            @endphp
+
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <h2 class="text-xl sm:text-2xl font-black text-[#032B45] tracking-tight">Pedidos recibidos</h2>
+
+                <div class="relative">
+                    <button type="button" @click="historialAbierto = !historialAbierto" class="w-full sm:w-auto flex items-center justify-between gap-4 bg-[#032B45] hover:bg-[#064363] text-white px-5 py-3 rounded-xl shadow-md transition-all">
+                        <span class="text-xs font-bold" x-text="etiquetaPedidos"></span>
+                        <svg class="w-4 h-4 transition-transform duration-200" :class="historialAbierto ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+
+                    <div x-show="historialAbierto" @click.outside="historialAbierto = false" x-transition style="display:none;" class="absolute right-0 top-full mt-2 w-full sm:w-72 bg-white border border-slate-200 rounded-2xl shadow-xl z-30 p-3 space-y-2">
+                        <p class="text-[10px] font-black uppercase tracking-wider text-slate-400 px-3 py-2">Seleccionar fecha</p>
+
+                        <button type="button" @click="fechaSeleccionada = '{{ $hoy }}'; etiquetaPedidos = 'Pedidos de hoy: {{ $pedidos->count() }}'; historialAbierto = false" class="w-full flex items-center justify-between px-3 py-3 rounded-xl text-left transition-colors" :class="fechaSeleccionada === '{{ $hoy }}' ? 'bg-[#00A88F]/10 text-[#032B45]' : 'hover:bg-slate-50 text-slate-700'">
+                            <span class="text-xs font-bold">Hoy</span>
+                            <span class="text-[10px] font-extrabold bg-white border border-slate-200 px-2.5 py-1 rounded-lg">{{ $pedidos->count() }} {{ $pedidos->count() === 1 ? 'pedido' : 'pedidos' }}</span>
+                        </button>
+
+                        @forelse($pedidosPorDia as $fechaDia => $pedidosDelDia)
+                            <button type="button" @click="fechaSeleccionada = '{{ $fechaDia }}'; etiquetaPedidos = 'Pedidos del {{ \Carbon\Carbon::parse($fechaDia)->format('d/m/Y') }}: {{ $pedidosDelDia->count() }}'; historialAbierto = false" class="w-full flex items-center justify-between px-3 py-3 rounded-xl text-left transition-colors" :class="fechaSeleccionada === '{{ $fechaDia }}' ? 'bg-[#00A88F]/10 text-[#032B45]' : 'hover:bg-slate-50 text-slate-700'">
+                                <span class="text-xs font-bold">{{ \Carbon\Carbon::parse($fechaDia)->format('d/m/Y') }}</span>
+                                <span class="text-[10px] font-extrabold bg-white border border-slate-200 px-2.5 py-1 rounded-lg">{{ $pedidosDelDia->count() }} {{ $pedidosDelDia->count() === 1 ? 'pedido' : 'pedidos' }}</span>
+                            </button>
+                        @empty
+                            <p class="text-xs text-slate-400 px-3 py-2">Todavía no hay pedidos anteriores.</p>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
 
             <div class="hidden lg:grid grid-cols-5 gap-4 px-6 text-xs font-black text-slate-400 uppercase tracking-wider">
                 <div>Pedido</div>
@@ -110,95 +240,105 @@
                 <div>Acción</div>
             </div>
 
-            <div class="space-y-4">
-                @forelse($pedidos as $pedido)
-                    @php
-                        $estadoId = $pedido->id_estado;
-                        $estadoClase = match((int)$estadoId) {
-                            1 => 'bg-amber-100 text-amber-800 border-amber-300',
-                            2 => 'bg-blue-100 text-blue-800 border-blue-300',
-                            3 => 'bg-emerald-100 text-emerald-800 border-emerald-300',
-                            4 => 'bg-green-600 text-white border-green-700',
-                            5 => 'bg-rose-100 text-rose-800 border-rose-300',
-                            default => 'bg-white text-slate-900 border-slate-300'
-                        };
-                    @endphp
-
-                    <div class="bg-slate-300/95 border border-slate-400/80 p-6 rounded-[2rem] shadow-md grid grid-cols-1 lg:grid-cols-5 gap-6 items-center">
-
-                        <div class="space-y-1">
-                            <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Pedido</span>
-                            <span class="text-lg font-black text-[#032B45]">#{{ $pedido->id_pedido }}</span>
-                            <p class="text-xs font-bold text-slate-700">
-                                {{ $pedido->fecha?->format('d/m/Y H:i') }}
-                            </p>
+            @foreach($pedidosPorFecha as $fechaDia => $pedidosDelDia)
+                <div x-show="fechaSeleccionada === '{{ $fechaDia }}'" x-transition class="space-y-4">
+                    <div class="flex items-center justify-between bg-[#00A88F]/10 border border-[#00A88F]/30 rounded-2xl px-5 py-3">
+                        <div class="flex items-center gap-3">
+                            <span class="w-2.5 h-2.5 rounded-full bg-[#00A88F]"></span>
+                            <h3 class="text-sm font-black text-[#032B45]">
+                                {{ $fechaDia === $hoy ? 'Pedidos de hoy' : 'Pedidos del ' . \Carbon\Carbon::parse($fechaDia)->format('d/m/Y') }}
+                            </h3>
                         </div>
-
-                        <div class="space-y-1">
-                            <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Total</span>
-                            <span class="text-base font-extrabold text-slate-900">
-                                ${{ number_format($pedido->total, 2, ',', '.') }}
-                            </span>
-                        </div>
-
-                        <div class="space-y-1">
-                            <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Estado</span>
-                            <span class="inline-block px-3 py-1.5 border rounded-xl text-xs font-extrabold shadow-2xs {{ $estadoClase }}">
-                                {{ $pedido->estadoPedido?->nombre ?? 'Sin estado' }}
-                            </span>
-                        </div>
-
-                        <div class="space-y-2 lg:col-span-1" x-data="{ open: false }">
-                            <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Información del cliente</span>
-
-                            <button
-                                @click="open = !open"
-                                type="button"
-                                class="w-full text-xs font-bold text-[#032B45] hover:text-[#00A88F] bg-white px-4 py-2.5 rounded-xl border border-slate-300 shadow-2xs inline-flex items-center justify-between transition-colors"
-                            >
-                                <span>Ver datos</span>
-                                <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                            </button>
-
-                            <div
-                                x-show="open"
-                                x-transition
-                                style="display: none;"
-                                class="w-full bg-white rounded-2xl p-3.5 border border-slate-300 shadow-inner text-xs space-y-1.5 text-slate-800"
-                            >
-                                <div class="flex items-center justify-between pb-1 border-b border-slate-100 font-black text-[#032B45] text-[11px] uppercase">
-                                    <span>Cliente</span>
-                                    <span class="w-1.5 h-1.5 rounded-full bg-[#00A88F]"></span>
-                                </div>
-                                <p><strong>Nombre:</strong> @if($pedido->cliente) {{ $pedido->cliente->nombre }} {{ $pedido->cliente->apellido }} @else No vinculado @endif</p>
-                                <p><strong>Teléfono:</strong> {{ $pedido->cliente?->telefono ?? 'No disponible' }}</p>
-                                <p><strong>Email:</strong> {{ $pedido->cliente?->email ?? 'No disponible' }}</p>
-                                <p><strong>Dirección:</strong> {{ $pedido->direccion_entrega ?? 'Sin dirección' }}</p>
-                            </div>
-                        </div>
-
-                        <div class="space-y-2">
-                            <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Acción</span>
-                            <form method="POST" action="{{ route('dashboard.pedido.estado', $pedido->id_pedido) }}" class="space-y-2 w-full">
-                                @csrf
-                                <select name="id_estado" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#00A88F] shadow-2xs">
-                                    <option value="1" {{ $pedido->id_estado == 1 ? 'selected' : '' }}>Pendiente</option>
-                                    <option value="2" {{ $pedido->id_estado == 2 ? 'selected' : '' }}>En preparación</option>
-                                    <option value="3" {{ $pedido->id_estado == 3 ? 'selected' : '' }}>Listo para entregar</option>
-                                    <option value="4" {{ $pedido->id_estado == 4 ? 'selected' : '' }}>Entregado</option>
-                                    <option value="5" {{ $pedido->id_estado == 5 ? 'selected' : '' }}>Cancelado</option>
-                                </select>
-                                <button type="submit" class="w-full bg-[#032B45] hover:bg-[#00A88F] text-white font-extrabold py-2 px-3 rounded-xl text-xs transition-colors shadow-2xs text-center">
-                                    Actualizar estado
-                                </button>
-                            </form>
-                        </div>
-
+                        <span class="text-xs font-extrabold text-[#008f7a] bg-white px-3 py-1.5 rounded-lg">
+                            {{ $pedidosDelDia->count() }} {{ $pedidosDelDia->count() === 1 ? 'pedido' : 'pedidos' }}
+                        </span>
                     </div>
-                @empty
-                    <p class="text-sm text-slate-400 font-medium text-center py-8">Todavía no hay pedidos registrados.</p>
-                @endforelse
-            </div>
+
+                    @forelse($pedidosDelDia as $pedido)
+                        @php
+                            $estadoId = (int) $pedido->id_estado;
+
+                            $estadoClase = match($estadoId) {
+                                1 => 'bg-amber-100 text-amber-800 border-amber-300',
+                                2 => 'bg-violet-100 text-violet-800 border-violet-300',
+                                3 => 'bg-emerald-100 text-emerald-800 border-emerald-300',
+                                4 => 'bg-green-700 text-white border-green-800',
+                                5 => 'bg-rose-100 text-rose-800 border-rose-300',
+                                6 => 'bg-blue-100 text-blue-800 border-blue-300',
+                                7 => 'bg-orange-100 text-orange-800 border-orange-300',
+                                default => 'bg-slate-100 text-slate-800 border-slate-300'
+                            };
+                        @endphp
+
+                        <div class="bg-slate-300/95 border border-slate-400/80 p-6 rounded-[2rem] shadow-md grid grid-cols-1 lg:grid-cols-5 gap-6 items-center">
+
+                            <div class="space-y-1">
+                                <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Pedido</span>
+                                <span class="text-lg font-black text-[#032B45]">#{{ $pedido->id_pedido }}</span>
+                                <p class="text-xs font-bold text-slate-700">{{ $pedido->fecha?->format('d/m/Y H:i') }}</p>
+                            </div>
+
+                            <div class="space-y-1">
+                                <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Total</span>
+                                <span class="text-base font-extrabold text-slate-900">${{ number_format($pedido->total, 2, ',', '.') }}</span>
+                            </div>
+
+                            <div class="space-y-1">
+                                <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Estado</span>
+                                <span class="inline-block px-3 py-1.5 border rounded-xl text-xs font-extrabold shadow-2xs {{ $estadoClase }}">
+                                    {{ $pedido->estadoPedido?->nombre ?? 'Sin estado' }}
+                                </span>
+                            </div>
+
+                            <div class="space-y-2 lg:col-span-1" x-data="{ open: false }">
+                                <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Información del cliente</span>
+
+                                <button @click="open = !open" type="button" class="w-full text-xs font-bold text-[#032B45] hover:text-[#00A88F] bg-white px-4 py-2.5 rounded-xl border border-slate-300 shadow-2xs inline-flex items-center justify-between transition-colors">
+                                    <span>Ver datos</span>
+                                    <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
+
+                                <div x-show="open" x-transition style="display:none;" class="w-full bg-white rounded-2xl p-3.5 border border-slate-300 shadow-inner text-xs space-y-1.5 text-slate-800">
+                                    <div class="flex items-center justify-between pb-1 border-b border-slate-100 font-black text-[#032B45] text-[11px] uppercase">
+                                        <span>Cliente</span>
+                                        <span class="w-1.5 h-1.5 rounded-full bg-[#00A88F]"></span>
+                                    </div>
+                                    <p><strong>Nombre:</strong> @if($pedido->cliente) {{ $pedido->cliente->nombre }} {{ $pedido->cliente->apellido }} @else No vinculado @endif</p>
+                                    <p><strong>Teléfono:</strong> {{ $pedido->cliente?->telefono ?? 'No disponible' }}</p>
+                                    <p><strong>Email:</strong> {{ $pedido->cliente?->email ?? 'No disponible' }}</p>
+                                    <p><strong>Dirección:</strong> {{ $pedido->direccion_entrega ?? 'Sin dirección' }}</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Acción</span>
+                                <form method="POST" action="{{ route('dashboard.pedido.estado', $pedido->id_pedido) }}" class="space-y-2 w-full">
+                                    @csrf
+                                    <select name="id_estado" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#00A88F] shadow-2xs">
+                                        <option value="1" {{ $estadoId === 1 ? 'selected' : '' }}>Pendiente</option>
+                                        <option value="6" {{ $estadoId === 6 ? 'selected' : '' }}>Aceptado</option>
+                                        <option value="2" {{ $estadoId === 2 ? 'selected' : '' }}>En preparación</option>
+                                        <option value="3" {{ $estadoId === 3 ? 'selected' : '' }}>Listo para entregar</option>
+                                        <option value="7" {{ $estadoId === 7 ? 'selected' : '' }}>En camino</option>
+                                        <option value="4" {{ $estadoId === 4 ? 'selected' : '' }}>Entregado</option>
+                                        <option value="5" {{ $estadoId === 5 ? 'selected' : '' }}>Cancelado</option>
+                                    </select>
+                                    <button type="submit" class="w-full bg-[#032B45] hover:bg-[#00A88F] text-white font-extrabold py-2 px-3 rounded-xl text-xs transition-colors shadow-2xs text-center">
+                                        Actualizar estado
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div>
+                    @empty
+                        <div class="text-center py-10 bg-slate-50 border border-slate-200 rounded-[2rem]">
+                            <p class="text-sm font-bold text-slate-600">No hay pedidos para esta fecha.</p>
+                        </div>
+                    @endforelse
+                </div>
+            @endforeach
         </section>
 
         <section x-show="tab === 'productos'" class="space-y-6">
@@ -216,12 +356,7 @@
                     <div class="bg-slate-300/95 border border-slate-400/80 p-5 rounded-[2rem] flex flex-col justify-between shadow-md space-y-4">
                         <div class="flex items-start gap-4">
                             @if($imagenProducto)
-                                <img
-                                    src="{{ $imagenProducto }}"
-                                    alt="{{ $producto->nombre }}"
-                                    class="w-16 h-16 object-cover rounded-2xl border border-slate-300 shadow-sm flex-shrink-0 bg-white"
-                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                                >
+                                <img src="{{ $imagenProducto }}" alt="{{ $producto->nombre }}" class="w-16 h-16 object-cover rounded-2xl border border-slate-300 shadow-sm flex-shrink-0 bg-white" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                 <div class="w-16 h-16 bg-white border border-slate-300 rounded-2xl items-center justify-center text-[10px] font-bold text-slate-500 flex-shrink-0 hidden">
                                     Sin img
                                 </div>
@@ -379,7 +514,6 @@
         </section>
 
     </main>
-
 </div>
 
 </body>

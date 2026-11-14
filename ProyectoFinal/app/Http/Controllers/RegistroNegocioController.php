@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Comercio;
 use App\Models\User;
+use App\Models\Suscripcion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Hash;
 
 class RegistroNegocioController extends Controller
 {
@@ -35,17 +36,28 @@ class RegistroNegocioController extends Controller
                 'direccion' => $data['direccion'] ?? null,
                 'telefono' => $data['telefono'] ?? null,
                 'email' => $data['email_comercio'] ?? null,
-                'activo' => true,
+                'activo' => false,
             ]);
 
             $usuario = User::create([
                 'nombre' => $data['nombre'],
                 'apellido' => $data['apellido'],
                 'email' => $data['email'],
-                'contrasena' => bcrypt($data['password']),
+                'contrasena' => Hash::make($data['password']),
                 'telefono' => $data['telefono'] ?? null,
                 'rol' => 'dueño',
                 'id_comercio' => $comercio->id_comercio,
+            ]);
+
+            Suscripcion::create([
+                'id_comercio' => $comercio->id_comercio,
+                'fecha_inicio' => null,
+                'fecha_vencimiento' => null,
+                'monto' => 5000,
+                'periodicidad' => 'mensual',
+                'estado' => 'pendiente_pago',
+                'meses_promocion' => 12,
+                'monto_renovacion' => null,
             ]);
 
             return $usuario;
@@ -53,8 +65,8 @@ class RegistroNegocioController extends Controller
 
         Auth::login($usuario);
 
-$request->session()->regenerate();
+        $request->session()->regenerate();
 
-return redirect()->route('dashboard');
+        return redirect()->route('suscripcion.pago');
     }
 }

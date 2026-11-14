@@ -36,4 +36,9 @@ class Comercio extends Model
     {
         return $this->hasMany(Pedido::class, 'id_comercio', 'id_comercio');
     }
+
+    public function suscripciones()
+    {
+        return $this->hasMany(Suscripcion::class, 'id_comercio', 'id_comercio');
+    }
 }
