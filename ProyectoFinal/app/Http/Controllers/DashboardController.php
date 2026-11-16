@@ -6,9 +6,12 @@ use App\Models\Pedido;
 use App\Models\Producto;
 use App\Models\ProductoPrecio;
 use App\Models\TipoPrecio;
+use App\Models\NotificacionComercio;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Database\QueryException;
 use Illuminate\Validation\ValidationException;
 
@@ -28,16 +31,77 @@ class DashboardController extends Controller
             ->latest('id_producto')
             ->get();
 
+        $hoy = now()->toDateString();
+
+        // Pedidos de hoy, incluyendo el tipo de entrega elegido por el cliente.
         $pedidos = Pedido::with([
             'detalles.producto',
             'estadoPedido',
             'cliente',
+            'tipoEntrega',
         ])
             ->where('id_comercio', $comercio->id_comercio)
-            ->latest('id_pedido')
+            ->whereDate('fecha', $hoy)
+            ->latest('fecha')
             ->get();
 
-        return view('dashboard.index', compact('comercio', 'productos', 'pedidos'));
+        // Pedidos anteriores, incluyendo también el tipo de entrega.
+        $pedidosAnteriores = Pedido::with([
+            'detalles.producto',
+            'estadoPedido',
+            'cliente',
+            'tipoEntrega',
+        ])
+            ->where('id_comercio', $comercio->id_comercio)
+            ->whereDate('fecha', '<', $hoy)
+            ->latest('fecha')
+            ->get();
+
+        $pedidosPorDia = $pedidosAnteriores
+            ->groupBy(fn ($pedido) => $pedido->fecha?->format('Y-m-d'))
+            ->sortKeysDesc();
+
+        $notificaciones = NotificacionComercio::where(
+            'id_comercio',
+            $comercio->id_comercio
+        )
+            ->orderByDesc('fecha_creacion')
+            ->get();
+
+        $notificacionesNuevas = $notificaciones
+            ->where('leida', false);
+
+        return view('dashboard.index', compact(
+            'comercio',
+            'productos',
+            'pedidos',
+            'pedidosPorDia',
+            'notificaciones',
+            'notificacionesNuevas'
+        ));
+    }
+
+    public function marcarNotificacionLeida($idNotificacion)
+    {
+        $comercio = Auth::user()?->comercio;
+
+        if (! $comercio) {
+            abort(403, 'Este usuario no tiene un comercio asociado.');
+        }
+
+        $notificacion = NotificacionComercio::where(
+            'id_notificacion',
+            $idNotificacion
+        )
+            ->where('id_comercio', $comercio->id_comercio)
+            ->firstOrFail();
+
+        $notificacion->leida = true;
+        $notificacion->save();
+
+        return redirect()
+            ->route('dashboard')
+            ->with('success', 'Notificación marcada como leída.');
     }
 
     public function storeProducto(Request $request)
@@ -47,6 +111,7 @@ class DashboardController extends Controller
             'descripcion' => ['nullable', 'string'],
             'stock' => ['required', 'integer', 'min:0'],
             'precio' => ['required', 'numeric', 'min:0'],
+            'imagen' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ]);
 
         $usuario = Auth::user();
@@ -56,11 +121,26 @@ class DashboardController extends Controller
             abort(403, 'Este usuario no tiene un comercio asociado.');
         }
 
+        $rutaImagen = null;
+
+        if ($request->hasFile('imagen')) {
+            $archivo = $request->file('imagen');
+            $nombreCarpeta = Str::slug($comercio->nombre);
+            $nombreArchivo = time() . '_' . Str::slug($request->nombre) . '.' . $archivo->getClientOriginalExtension();
+
+            $rutaImagen = $archivo->storeAs(
+                "img/{$nombreCarpeta}",
+                $nombreArchivo,
+                'public'
+            );
+        }
+
         $producto = Producto::create([
             'nombre' => $request->input('nombre'),
             'descripcion' => $request->input('descripcion'),
             'disponible' => true,
             'stock' => (int) $request->input('stock'),
+            'imagen' => $rutaImagen,
             'id_comercio' => $comercio->id_comercio,
         ]);
 
@@ -92,6 +172,7 @@ class DashboardController extends Controller
             'descripcion' => ['nullable', 'string'],
             'stock' => ['required', 'integer', 'min:0'],
             'precio' => ['required', 'numeric', 'min:0'],
+            'imagen' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
         ]);
 
         $comercio = Auth::user()?->comercio;
@@ -104,24 +185,40 @@ class DashboardController extends Controller
             ->where('id_producto', $idProducto)
             ->firstOrFail();
 
-        DB::transaction(function () use ($request, $producto) {
+        $imagenAnterior = $producto->imagen;
+        $nuevaImagen = null;
 
-            $producto->update([
+        DB::transaction(function () use ($request, $producto, $comercio, &$nuevaImagen) {
+
+            $datosActualizar = [
                 'nombre' => $request->input('nombre'),
                 'descripcion' => $request->input('descripcion'),
                 'stock' => (int) $request->input('stock'),
-            ]);
+            ];
+
+            if ($request->hasFile('imagen')) {
+                $archivo = $request->file('imagen');
+                $nombreCarpeta = Str::slug($comercio->nombre);
+                $nombreArchivo = time() . '_' . Str::slug($request->input('nombre')) . '.' . $archivo->getClientOriginalExtension();
+
+                $nuevaImagen = $archivo->storeAs(
+                    "img/{$nombreCarpeta}",
+                    $nombreArchivo,
+                    'public'
+                );
+
+                $datosActualizar['imagen'] = $nuevaImagen;
+            }
+
+            $producto->update($datosActualizar);
 
             $precioProducto = $producto->precios()->first();
 
             if ($precioProducto) {
-
                 $precioProducto->update([
                     'precio' => $request->input('precio'),
                 ]);
-
             } else {
-
                 $tipoPrecio = TipoPrecio::where('activo', true)
                     ->orderBy('id_tipo_precio')
                     ->first();
@@ -142,6 +239,10 @@ class DashboardController extends Controller
             }
         });
 
+        if ($nuevaImagen && $imagenAnterior && $imagenAnterior !== $nuevaImagen) {
+            $this->eliminarImagen($imagenAnterior);
+        }
+
         return back()->with('success', 'Producto actualizado correctamente.');
     }
 
@@ -157,20 +258,22 @@ class DashboardController extends Controller
             ->where('id_producto', $idProducto)
             ->firstOrFail();
 
-        try {
+        $rutaImagen = $producto->imagen;
 
+        try {
             DB::transaction(function () use ($producto) {
                 $producto->precios()->delete();
                 $producto->delete();
             });
 
         } catch (QueryException $e) {
-
             return back()->with(
                 'error',
                 'No se pudo eliminar el producto. Puede estar asociado a pedidos existentes.'
             );
         }
+
+        $this->eliminarImagen($rutaImagen);
 
         return back()->with('success', 'Producto eliminado correctamente.');
     }
@@ -207,16 +310,20 @@ class DashboardController extends Controller
                 ]);
             }
 
+            if ($estadoActual === 4 && $nuevoEstado === 5) {
+                throw ValidationException::withMessages([
+                    'id_estado' => 'Un pedido entregado no puede ser cancelado.',
+                ]);
+            }
+
             if ($estadoActual === $nuevoEstado) {
                 return;
             }
 
             if ($nuevoEstado === 5) {
-
                 $pedidoActual->load('detalles');
 
                 foreach ($pedidoActual->detalles as $detalle) {
-
                     $producto = Producto::where(
                         'id_producto',
                         $detalle->id_producto
@@ -233,11 +340,25 @@ class DashboardController extends Controller
 
             $pedidoActual->id_estado = $nuevoEstado;
             $pedidoActual->save();
-
         });
 
         return redirect()
             ->route('dashboard')
             ->with('success', 'Estado del pedido actualizado correctamente.');
+    }
+
+    private function eliminarImagen(?string $rutaImagen)
+    {
+        if (! $rutaImagen) {
+            return;
+        }
+
+        Storage::disk('public')->delete($rutaImagen);
+
+        $rutaPublica = public_path($rutaImagen);
+
+        if (is_file($rutaPublica)) {
+            @unlink($rutaPublica);
+        }
     }
 }

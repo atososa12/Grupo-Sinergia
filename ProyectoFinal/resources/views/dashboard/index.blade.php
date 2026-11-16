@@ -3,184 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Dashboard</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            background: #f3f4f6;
-            color: #111827;
-        }
-
-        .wrap {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 2rem 1rem;
-        }
-
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #fff;
-            padding: 1rem 1.2rem;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 1.1fr 1.4fr;
-            gap: 1.5rem;
-        }
-
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 1rem;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.04);
-            min-width: 0;
-        }
-
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .table th,
-        .table td {
-            border-bottom: 1px solid #e5e7eb;
-            padding: .75rem .5rem;
-            text-align: left;
-            vertical-align: top;
-        }
-
-        .btn {
-            background: #111827;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 0.7rem 1rem;
-            cursor: pointer;
-        }
-
-        .alert {
-            background: #dcfce7;
-            color: #166534;
-            padding: .8rem 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-
-        input,
-        textarea,
-        select {
-            width: 100%;
-            box-sizing: border-box;
-            padding: .7rem;
-            border-radius: 8px;
-            border: 1px solid #d1d5db;
-            margin-bottom: .8rem;
-        }
-
-        .pedido-info {
-            min-width: 180px;
-            padding: 10px;
-            background: #f9fafb;
-            border-radius: 8px;
-            margin-top: 8px;
-        }
-
-        .pedido-info p {
-            margin: 5px 0 12px;
-            overflow-wrap: anywhere;
-        }
-
-        .pedido-info strong {
-            display: block;
-            margin-top: 8px;
-        }
-
-        details summary {
-            cursor: pointer;
-            font-weight: bold;
-            color: #1d4ed8;
-        }
-
-        .pedidos-container {
-            overflow-x: auto;
-        }
-
-        @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-
-            .topbar {
-                flex-wrap: wrap;
-                gap: 1rem;
-            }
-
-            .table {
-                font-size: 13px;
-            }
-
-            .table th,
-            .table td {
-                padding: .5rem .3rem;
-            }
-        }
-    </style>
+    <title>Panel de Administración - {{ $comercio->nombre }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
+<body class="bg-[#032B45] text-slate-800 font-sans antialiased min-h-screen p-4 sm:p-6 lg:p-10 relative overflow-x-hidden" x-data="{ tab: localStorage.getItem('admin_tab') || 'pedidos' }" x-init="$watch('tab', val => localStorage.setItem('admin_tab', val))">
 
-<body>
+<div class="max-w-7xl mx-auto space-y-6 relative z-10">
 
-<div class="wrap">
+    <header class="bg-white p-6 sm:p-8 rounded-[2.5rem] shadow-2xl flex flex-col sm:flex-row justify-between items-center gap-6">
+        <div class="flex items-center gap-5">
+            <div class="relative flex-shrink-0">
+                @php
+                    $nombreLimpio = strtolower($comercio->nombre);
+                    $logoRuta = asset('storage/img/logo-sinergia.png');
 
-    <div class="topbar">
-        <div>
-            <strong>Panel de {{ $comercio->nombre }}</strong>
+                    if (str_contains($nombreLimpio, 'cuarta')) {
+                        $logoRuta = asset('storage/img/la-cuarta-masa/logo-la-cuarta-masa.png');
+                    } elseif (str_contains($nombreLimpio, 'don pepe')) {
+                        $logoRuta = asset('storage/img/don-pepe/logo-don-pepe.png');
+                    }
+                @endphp
+
+                <img src="{{ $logoRuta }}" alt="Logo {{ $comercio->nombre }}" class="h-24 w-24 sm:h-28 sm:w-28 rounded-full object-cover p-1 bg-white shadow-xl ring-4 ring-[#00A88F]" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="h-24 w-24 sm:h-28 sm:w-28 bg-[#00A88F] text-white font-black rounded-full items-center justify-center text-3xl shadow-xl ring-4 ring-[#032B45] hidden">
+                    {{ strtoupper(substr($comercio->nombre, 0, 2)) }}
+                </div>
+            </div>
+
+            <div class="space-y-1 text-center sm:text-left">
+                <span class="text-xs font-bold uppercase tracking-widest text-[#00A88F]">Panel de Administración</span>
+                <h1 class="text-2xl sm:text-3xl font-black text-[#032B45] tracking-tight">{{ $comercio->nombre }}</h1>
+            </div>
         </div>
 
-        <div style="display:flex; gap:10px; align-items:center;">
+        <div class="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
 
-            <a href="{{ route('comercio.show', $comercio->id_comercio) }}"
-               class="btn"
-               style="text-decoration:none; display:inline-block;">
-                Ver mi tienda
+            <a href="{{ route('suscripcion.pago') }}" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#032B45] hover:bg-[#064363] text-white font-extrabold px-6 py-3.5 rounded-2xl shadow-lg transition-all text-sm text-center">
+                <svg class="w-5 h-5 text-[#00A88F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h2m4 0h2M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                Mi suscripción
             </a>
 
-            <form method="POST" action="{{ route('logout') }}">
+            <a href="{{ route('comercio.show', $comercio->id_comercio) }}" class="w-full sm:w-auto bg-[#00A88F] hover:bg-[#008f7a] text-white font-extrabold px-6 py-3.5 rounded-2xl shadow-lg shadow-[#00A88F]/20 transition-all text-sm text-center">
+                Ver mi tienda &rarr;
+            </a>
+
+            <form method="POST" action="{{ route('logout') }}" class="w-full sm:w-auto">
                 @csrf
-                <button type="submit" class="btn">
+                <button type="submit" class="w-full bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 font-bold px-5 py-3.5 rounded-2xl border border-slate-200 transition-all text-sm">
                     Salir
                 </button>
             </form>
-
         </div>
-    </div>
+    </header>
+
+    <nav class="bg-white p-2.5 rounded-2xl shadow-xl grid grid-cols-2 md:grid-cols-5 gap-2">
+        <button @click="tab = 'pedidos'" :class="tab === 'pedidos' ? 'bg-[#00A88F] text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'" class="py-3.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm transition-all text-center">
+            Pedidos recibidos
+        </button>
+
+        <button @click="tab = 'productos'" :class="tab === 'productos' ? 'bg-[#00A88F] text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'" class="py-3.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm transition-all text-center">
+            Productos actuales
+        </button>
+
+        <button @click="tab = 'agregar'" :class="tab === 'agregar' ? 'bg-[#00A88F] text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'" class="py-3.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm transition-all text-center">
+            Agregar productos
+        </button>
+
+        <button @click="tab = 'configuracion'" :class="tab === 'configuracion' ? 'bg-[#00A88F] text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'" class="py-3.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm transition-all text-center">
+            Configuración
+        </button>
+
+        <button @click="tab = 'notificaciones'" :class="tab === 'notificaciones' ? 'bg-[#00A88F] text-white shadow-md' : 'text-slate-600 hover:bg-slate-100'" class="py-3.5 px-4 rounded-xl font-extrabold text-xs sm:text-sm transition-all text-center flex items-center justify-center gap-2">
+            Notificaciones
+            @if($notificacionesNuevas->count() > 0)
+                <span class="bg-rose-500 text-white text-[10px] font-black rounded-full min-w-5 h-5 px-1.5 flex items-center justify-center">
+                    {{ $notificacionesNuevas->count() }}
+                </span>
+            @endif
+        </button>
+    </nav>
 
     @if(session('success'))
-        <div class="alert">
-            {{ session('success') }}
+        <div class="bg-[#00A88F]/15 backdrop-blur-md border border-[#00A88F]/40 text-emerald-100 p-4 rounded-2xl text-sm font-bold shadow-xl flex items-center gap-3">
+            <svg class="w-5 h-5 text-[#00A88F] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+            <span>{{ session('success') }}</span>
         </div>
     @endif
 
     @if(session('error'))
-        <div style="background:#fee2e2; color:#991b1b; padding:.8rem 1rem; border-radius:8px; margin-bottom:1rem;">
+        <div class="bg-rose-500/20 backdrop-blur-md border border-rose-500/40 text-rose-100 p-4 rounded-2xl text-sm font-bold shadow-xl">
             {{ session('error') }}
         </div>
     @endif
 
     @if($errors->any())
-        <div style="background:#fee2e2; color:#991b1b; padding:.8rem 1rem; border-radius:8px; margin-bottom:1rem;">
-            <ul>
+        <div class="bg-rose-500/20 backdrop-blur-md border border-rose-500/40 text-rose-100 p-4 rounded-2xl text-sm font-bold space-y-1 shadow-xl">
+            <ul class="list-disc pl-4">
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -188,285 +109,524 @@
         </div>
     @endif
 
-    <div class="grid">
+    <main class="bg-white p-6 sm:p-10 rounded-[2.5rem] shadow-2xl min-h-[450px]">
 
-        <section class="card">
-
-            <h2>Agregar producto</h2>
-
-            <form method="POST" action="{{ route('dashboard.producto.store') }}">
-                @csrf
-
-                <input type="text" name="nombre" placeholder="Nombre del producto" value="{{ old('nombre') }}" required>
-
-                <textarea name="descripcion" placeholder="Descripción">{{ old('descripcion') }}</textarea>
-
-                <input type="number" name="stock" min="0" placeholder="Stock" value="{{ old('stock') }}" required>
-
-                <input type="number" step="0.01" name="precio" min="0" placeholder="Precio" value="{{ old('precio') }}" required>
-
-                <button type="submit" class="btn">Guardar</button>
-            </form>
-
-            <hr>
-
-            <h3>Productos actuales</h3>
-
-            @forelse($productos as $producto)
-
-                @php
-                    $precio = $producto->precios->first();
-                @endphp
-
-                <div style="border:1px solid #e5e7eb; padding:1rem; border-radius:10px; margin-bottom:1rem;">
-
-                    <strong>{{ $producto->nombre }}</strong>
-
-                    <p>
-                        Precio: ${{ number_format($precio?->precio ?? 0, 2, ',', '.') }}
-                        <br>
-                        Stock: {{ $producto->stock }}
-                    </p>
-
-                    <details>
-                        <summary style="cursor:pointer; margin-bottom:1rem;">
-                            Editar producto
-                        </summary>
-
-                        <form method="POST" action="{{ route('dashboard.producto.update', $producto->id_producto) }}">
-                            @csrf
-                            @method('PUT')
-
-                            <label>Nombre</label>
-                            <input type="text" name="nombre" value="{{ $producto->nombre }}" required>
-
-                            <label>Descripción</label>
-                            <textarea name="descripcion">{{ $producto->descripcion }}</textarea>
-
-                            <label>Stock</label>
-                            <input type="number" name="stock" min="0" value="{{ $producto->stock }}" required>
-
-                            <label>Precio</label>
-                            <input type="number" name="precio" min="0" step="0.01" value="{{ $precio?->precio ?? 0 }}" required>
-
-                            <button type="submit" class="btn">
-                                Guardar cambios
-                            </button>
-                        </form>
-                    </details>
-
-                    <form method="POST"
-                          action="{{ route('dashboard.producto.destroy', $producto->id_producto) }}"
-                          onsubmit="return confirm('¿Seguro que querés eliminar este producto?');"
-                          style="margin-top:1rem;">
-
-                        @csrf
-                        @method('DELETE')
-
-                        <button type="submit" class="btn" style="background:#b91c1c;">
-                            Eliminar producto
-                        </button>
-
-                    </form>
-
+        {{-- NOTIFICACIONES --}}
+        <section x-show="tab === 'notificaciones'" x-cloak class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-black text-[#032B45] tracking-tight">Notificaciones</h2>
+                    <p class="text-sm text-slate-500 font-medium mt-1">Avisos sobre los pagos y la suscripción de tu comercio.</p>
                 </div>
 
+                <div class="bg-[#00A88F]/10 text-[#008f7a] border border-[#00A88F]/30 rounded-xl px-4 py-2 text-xs font-extrabold">
+                    {{ $notificacionesNuevas->count() }} nuevas
+                </div>
+            </div>
+
+            @forelse($notificaciones as $notificacion)
+                @php
+                    $esAprobada = $notificacion->tipo === 'pago_aprobado';
+
+                    $claseNotificacion = $esAprobada
+                        ? 'border-emerald-300 bg-emerald-50'
+                        : 'border-rose-300 bg-rose-50';
+
+                    $colorIcono = $esAprobada
+                        ? 'bg-emerald-100 text-emerald-700'
+                        : 'bg-rose-100 text-rose-700';
+                @endphp
+
+                <div class="border {{ $claseNotificacion }} rounded-2xl p-5 sm:p-6 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-start gap-4">
+
+                        <div class="w-12 h-12 rounded-2xl {{ $colorIcono }} flex items-center justify-center flex-shrink-0">
+                            @if($esAprobada)
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            @else
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            @endif
+                        </div>
+
+                        <div class="flex-1 min-w-0 space-y-2">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <h3 class="font-black text-[#032B45]">
+                                    {{ $notificacion->titulo }}
+                                </h3>
+
+                                @if(!$notificacion->leida)
+                                    <span class="bg-[#00A88F] text-white text-[10px] uppercase tracking-wider font-black px-2.5 py-1 rounded-full">
+                                        Nueva
+                                    </span>
+                                @else
+                                    <span class="bg-slate-200 text-slate-600 text-[10px] uppercase tracking-wider font-black px-2.5 py-1 rounded-full">
+                                        Leída
+                                    </span>
+                                @endif
+                            </div>
+
+                            <p class="text-sm text-slate-700 leading-relaxed">
+                                {{ $notificacion->mensaje }}
+                            </p>
+
+                            <p class="text-xs text-slate-500 font-semibold">
+                                {{ $notificacion->fecha_creacion?->format('d/m/Y H:i') ?? 'Fecha no disponible' }}
+                            </p>
+
+                            @if(!$notificacion->leida)
+                                <form method="POST" action="{{ route('dashboard.notificacion.leida', $notificacion->id_notificacion) }}">
+                                    @csrf
+                                    <button type="submit" class="inline-flex items-center gap-2 bg-[#032B45] hover:bg-[#00A88F] text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-colors shadow-sm mt-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                        Marcar como leída
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    </div>
+                </div>
             @empty
-                <p>No hay productos aún.</p>
+                <div class="text-center py-16 bg-slate-50 border border-slate-200 rounded-[2rem]">
+                    <div class="w-16 h-16 mx-auto bg-slate-100 rounded-2xl flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-black text-[#032B45]">Todavía no tenés notificaciones</h3>
+                    <p class="text-sm text-slate-500 mt-2">Acá vas a recibir los avisos sobre tus transferencias y suscripción.</p>
+                </div>
             @endforelse
-
         </section>
 
-        <section class="card">
+        {{-- PEDIDOS --}}
+        <section x-data="{ fechaSeleccionada: '{{ now()->toDateString() }}', historialAbierto: false, etiquetaPedidos: 'Pedidos del día: {{ $pedidos->count() }}' }" x-show="tab === 'pedidos'" class="space-y-6">
+            @php
+                $hoy = now()->toDateString();
+                $pedidosPorFecha = collect([$hoy => $pedidos])->merge($pedidosPorDia);
+            @endphp
 
-            <h2>Configuración del negocio</h2>
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <h2 class="text-xl sm:text-2xl font-black text-[#032B45] tracking-tight">Pedidos recibidos</h2>
 
-            <div style="margin-bottom:1.5rem;">
+                <div class="relative">
+                    <button type="button" @click="historialAbierto = !historialAbierto" class="w-full sm:w-auto flex items-center justify-between gap-4 bg-[#032B45] hover:bg-[#064363] text-white px-5 py-3 rounded-xl shadow-md transition-all">
+                        <span class="text-xs font-bold" x-text="etiquetaPedidos"></span>
+                        <svg class="w-4 h-4 transition-transform duration-200" :class="historialAbierto ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
 
-                <h3>Agregar tipo de precio</h3>
+                    <div x-show="historialAbierto" @click.outside="historialAbierto = false" x-transition style="display:none;" class="absolute right-0 top-full mt-2 w-full sm:w-72 bg-white border border-slate-200 rounded-2xl shadow-xl z-30 p-3 space-y-2">
+                        <p class="text-[10px] font-black uppercase tracking-wider text-slate-400 px-3 py-2">Seleccionar fecha</p>
 
-                <form method="POST" action="{{ route('dashboard.tipos.precio.store') }}">
-                    @csrf
+                        <button type="button" @click="fechaSeleccionada = '{{ $hoy }}'; etiquetaPedidos = 'Pedidos de hoy: {{ $pedidos->count() }}'; historialAbierto = false" class="w-full flex items-center justify-between px-3 py-3 rounded-xl text-left transition-colors" :class="fechaSeleccionada === '{{ $hoy }}' ? 'bg-[#00A88F]/10 text-[#032B45]' : 'hover:bg-slate-50 text-slate-700'">
+                            <span class="text-xs font-bold">Hoy</span>
+                            <span class="text-[10px] font-extrabold bg-white border border-slate-200 px-2.5 py-1 rounded-lg">{{ $pedidos->count() }} {{ $pedidos->count() === 1 ? 'pedido' : 'pedidos' }}</span>
+                        </button>
 
-                    <input type="text" name="nombre" placeholder="Ej: Mayorista, Promo, Familias" required>
-
-                    <input type="text" name="descripcion" placeholder="Descripción opcional">
-
-                    <button type="submit" class="btn">Guardar tipo de precio</button>
-                </form>
-
+                        @forelse($pedidosPorDia as $fechaDia => $pedidosDelDia)
+                            <button type="button" @click="fechaSeleccionada = '{{ $fechaDia }}'; etiquetaPedidos = 'Pedidos del {{ \Carbon\Carbon::parse($fechaDia)->format('d/m/Y') }}: {{ $pedidosDelDia->count() }}'; historialAbierto = false" class="w-full flex items-center justify-between px-3 py-3 rounded-xl text-left transition-colors" :class="fechaSeleccionada === '{{ $fechaDia }}' ? 'bg-[#00A88F]/10 text-[#032B45]' : 'hover:bg-slate-50 text-slate-700'">
+                                <span class="text-xs font-bold">{{ \Carbon\Carbon::parse($fechaDia)->format('d/m/Y') }}</span>
+                                <span class="text-[10px] font-extrabold bg-white border border-slate-200 px-2.5 py-1 rounded-lg">{{ $pedidosDelDia->count() }} {{ $pedidosDelDia->count() === 1 ? 'pedido' : 'pedidos' }}</span>
+                            </button>
+                        @empty
+                            <p class="text-xs text-slate-400 px-3 py-2">Todavía no hay pedidos anteriores.</p>
+                        @endforelse
+                    </div>
+                </div>
             </div>
 
-            <div style="margin-bottom:1.5rem;">
-
-                <h3>Agregar tipo de entrega</h3>
-
-                <form method="POST" action="{{ route('dashboard.tipos.entrega.store') }}">
-                    @csrf
-
-                    <input type="text" name="nombre" placeholder="Ej: Delivery, Retiro, Express" required>
-
-                    <button type="submit" class="btn">Guardar tipo de entrega</button>
-                </form>
-
+            <div class="hidden lg:grid grid-cols-5 gap-4 px-6 text-xs font-black text-slate-400 uppercase tracking-wider">
+                <div>Pedido</div>
+                <div>Total</div>
+                <div>Estado</div>
+                <div>Información del cliente</div>
+                <div>Acción</div>
             </div>
 
-            <div>
+            @foreach($pedidosPorFecha as $fechaDia => $pedidosDelDia)
+                <div x-show="fechaSeleccionada === '{{ $fechaDia }}'" x-transition class="space-y-4">
+                    <div class="flex items-center justify-between bg-[#00A88F]/10 border border-[#00A88F]/30 rounded-2xl px-5 py-3">
+                        <div class="flex items-center gap-3">
+                            <span class="w-2.5 h-2.5 rounded-full bg-[#00A88F]"></span>
+                            <h3 class="text-sm font-black text-[#032B45]">
+                                {{ $fechaDia === $hoy ? 'Pedidos de hoy' : 'Pedidos del ' . \Carbon\Carbon::parse($fechaDia)->format('d/m/Y') }}
+                            </h3>
+                        </div>
+                        <span class="text-xs font-extrabold text-[#008f7a] bg-white px-3 py-1.5 rounded-lg">
+                            {{ $pedidosDelDia->count() }} {{ $pedidosDelDia->count() === 1 ? 'pedido' : 'pedidos' }}
+                        </span>
+                    </div>
 
-                <h3>Agregar método de pago</h3>
+                    @forelse($pedidosDelDia as $pedido)
+                        @php
+                            $estadoId = (int) $pedido->id_estado;
 
-                <form method="POST" action="{{ route('dashboard.metodos.pago.store') }}">
-                    @csrf
+                            $estadoClase = match($estadoId) {
+                                1 => 'bg-amber-100 text-amber-800 border-amber-300',
+                                2 => 'bg-violet-100 text-violet-800 border-violet-300',
+                                3 => 'bg-emerald-100 text-emerald-800 border-emerald-300',
+                                4 => 'bg-green-700 text-white border-green-800',
+                                5 => 'bg-rose-100 text-rose-800 border-rose-300',
+                                6 => 'bg-blue-100 text-blue-800 border-blue-300',
+                                7 => 'bg-orange-100 text-orange-800 border-orange-300',
+                                default => 'bg-slate-100 text-slate-800 border-slate-300'
+                            };
 
-                    <input type="text" name="nombre" placeholder="Ej: Efectivo, POS" required>
+                            $tipoEntrega = $pedido->tipoEntrega?->nombre ?? 'No especificado';
+                            $esDelivery = str_contains(strtolower($tipoEntrega), 'delivery');
+                        @endphp
 
-                    <button type="submit" class="btn">Guardar método de pago</button>
-                </form>
+                        <div class="bg-slate-300/95 border border-slate-400/80 p-6 rounded-[2rem] shadow-md space-y-5">
+                            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 items-center">
 
-            </div>
+                                {{-- PEDIDO Y TIPO DE ENTREGA --}}
+                                <div class="space-y-2">
+                                    <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Pedido</span>
 
-        </section>
+                                    <span class="text-lg font-black text-[#032B45]">
+                                        #{{ $pedido->id_pedido }}
+                                    </span>
 
-        <section class="card" style="grid-column:1 / -1;">
+                                    <p class="text-xs font-bold text-slate-700">
+                                        {{ $pedido->fecha?->format('d/m/Y H:i') }}
+                                    </p>
 
-            <h2>Pedidos recibidos</h2>
+                                    <div class="pt-1">
+                                        <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 block mb-1">
+                                            Tipo de entrega
+                                        </span>
 
-            <div class="pedidos-container">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-extrabold border
+                                            {{ $esDelivery
+                                                ? 'bg-orange-100 text-orange-800 border-orange-300'
+                                                : 'bg-emerald-100 text-emerald-800 border-emerald-300' }}">
 
-                <table class="table">
+                                            @if($esDelivery)
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7h11v10H3z M14 11h4l3 4v2h-7z M7 20a2 2 0 100-4 2 2 0 000 4z M17 20a2 2 0 100-4 2 2 0 000 4z"/>
+                                                </svg>
+                                            @else
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14 M12 5l7 7-7 7"/>
+                                                </svg>
+                                            @endif
 
-                    <thead>
-                        <tr>
-                            <th>Pedido</th>
-                            <th>Total</th>
-                            <th>Estado</th>
-                            <th>Información del cliente</th>
-                            <th>Acción</th>
-                        </tr>
-                    </thead>
+                                            {{ $tipoEntrega }}
+                                        </span>
+                                    </div>
+                                </div>
 
-                    <tbody>
+                                {{-- TOTAL --}}
+                                <div class="space-y-1">
+                                    <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Total</span>
+                                    <span class="text-base font-extrabold text-slate-900">${{ number_format($pedido->total, 2, ',', '.') }}</span>
+                                </div>
 
-                        @forelse($pedidos as $pedido)
+                                {{-- ESTADO --}}
+                                <div class="space-y-1">
+                                    <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Estado</span>
+                                    <span class="inline-block px-3 py-1.5 border rounded-xl text-xs font-extrabold shadow-2xs {{ $estadoClase }}">
+                                        {{ $pedido->estadoPedido?->nombre ?? 'Sin estado' }}
+                                    </span>
+                                </div>
 
-                            <tr>
+                                {{-- INFORMACIÓN DEL CLIENTE --}}
+                                <div class="space-y-2" x-data="{ open: false }">
+                                    <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Información del cliente</span>
 
-                                <td>
-                                    <strong>#{{ $pedido->id_pedido }}</strong>
-                                    <br>
-                                    {{ $pedido->fecha?->format('d/m/Y H:i') }}
-                                </td>
+                                    <button @click="open = !open" type="button" class="w-full text-xs font-bold text-[#032B45] hover:text-[#00A88F] bg-white px-4 py-2.5 rounded-xl border border-slate-300 shadow-2xs inline-flex items-center justify-between transition-colors">
+                                        <span>Ver datos</span>
+                                        <svg class="w-3.5 h-3.5 transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                        </svg>
+                                    </button>
 
-                                <td>
-                                    ${{ number_format($pedido->total, 2, ',', '.') }}
-                                </td>
-
-                                <td>
-                                    {{ $pedido->estadoPedido?->nombre ?? 'Sin estado' }}
-                                </td>
-
-                                <td>
-
-                                    <details>
-
-                                        <summary>Ver datos del cliente</summary>
-
-                                        <div class="pedido-info">
-
-                                            <strong>Nombre:</strong>
-
-                                            <p>
-                                                @if($pedido->cliente)
-                                                    {{ $pedido->cliente->nombre }}
-                                                    {{ $pedido->cliente->apellido }}
-                                                @else
-                                                    Cliente no vinculado
-                                                @endif
-                                            </p>
-
-                                            <strong>Teléfono:</strong>
-
-                                            <p>
-                                                {{ $pedido->cliente?->telefono ?? 'No disponible' }}
-                                            </p>
-
-                                            <strong>Email:</strong>
-
-                                            <p>
-                                                {{ $pedido->cliente?->email ?? 'No disponible' }}
-                                            </p>
-
-                                            <strong>Dirección de entrega:</strong>
-
-                                            <p>
-                                                {{ $pedido->direccion_entrega ?? 'Sin dirección registrada' }}
-                                            </p>
-
+                                    <div x-show="open" x-transition style="display:none;" class="w-full bg-white rounded-2xl p-3.5 border border-slate-300 shadow-inner text-xs space-y-1.5 text-slate-800">
+                                        <div class="flex items-center justify-between pb-1 border-b border-slate-100 font-black text-[#032B45] text-[11px] uppercase">
+                                            <span>Cliente</span>
+                                            <span class="w-1.5 h-1.5 rounded-full bg-[#00A88F]"></span>
                                         </div>
 
-                                    </details>
+                                        <p><strong>Nombre:</strong> @if($pedido->cliente) {{ $pedido->cliente->nombre }} {{ $pedido->cliente->apellido }} @else No vinculado @endif</p>
+                                        <p><strong>Teléfono:</strong> {{ $pedido->cliente?->telefono ?? 'No disponible' }}</p>
+                                        <p><strong>Email:</strong> {{ $pedido->cliente?->email ?? 'No disponible' }}</p>
+                                        <p><strong>Dirección:</strong> {{ $pedido->direccion_entrega ?? 'Sin dirección' }}</p>
+                                    </div>
+                                </div>
 
-                                </td>
+                                {{-- ACCIÓN --}}
+                                <div class="space-y-2">
+                                    <span class="text-[11px] font-black text-slate-500 uppercase tracking-wider block lg:hidden">Acción</span>
 
-                                <td>
-
-                                    <form method="POST"
-                                          action="{{ route('dashboard.pedido.estado', $pedido->id_pedido) }}">
-
+                                    <form method="POST" action="{{ route('dashboard.pedido.estado', $pedido->id_pedido) }}" class="space-y-2 w-full">
                                         @csrf
 
-                                        <select name="id_estado" required>
-
-                                            <option value="1" {{ $pedido->id_estado == 1 ? 'selected' : '' }}>
-                                                Pendiente
-                                            </option>
-
-                                            <option value="2" {{ $pedido->id_estado == 2 ? 'selected' : '' }}>
-                                                En preparación
-                                            </option>
-
-                                            <option value="3" {{ $pedido->id_estado == 3 ? 'selected' : '' }}>
-                                                Listo para entregar
-                                            </option>
-
-                                            <option value="4" {{ $pedido->id_estado == 4 ? 'selected' : '' }}>
-                                                Entregado
-                                            </option>
-
-                                            <option value="5" {{ $pedido->id_estado == 5 ? 'selected' : '' }}>
-                                                Cancelado
-                                            </option>
-
+                                        <select name="id_estado" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:border-[#00A88F] shadow-2xs">
+                                            <option value="1" {{ $estadoId === 1 ? 'selected' : '' }}>Pendiente</option>
+                                            <option value="6" {{ $estadoId === 6 ? 'selected' : '' }}>Aceptado</option>
+                                            <option value="2" {{ $estadoId === 2 ? 'selected' : '' }}>En preparación</option>
+                                            <option value="3" {{ $estadoId === 3 ? 'selected' : '' }}>Listo para entregar</option>
+                                            <option value="7" {{ $estadoId === 7 ? 'selected' : '' }}>En camino</option>
+                                            <option value="4" {{ $estadoId === 4 ? 'selected' : '' }}>Entregado</option>
+                                            <option value="5" {{ $estadoId === 5 ? 'selected' : '' }}>Cancelado</option>
                                         </select>
 
-                                        <button type="submit" class="btn" style="margin-top:.5rem;">
-                                            Actualizar
+                                        <button type="submit" class="w-full bg-[#032B45] hover:bg-[#00A88F] text-white font-extrabold py-2 px-3 rounded-xl text-xs transition-colors shadow-2xs text-center">
+                                            Actualizar estado
                                         </button>
-
                                     </form>
+                                </div>
+                            </div>
 
-                                </td>
+                            {{-- DETALLE DEL PEDIDO --}}
+                            <div x-data="{ detalleAbierto: false }" class="border-t border-slate-400/60 pt-4">
+                                <button type="button" @click="detalleAbierto = !detalleAbierto" class="w-full flex items-center justify-between gap-3 bg-white hover:bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 transition-colors shadow-sm">
+                                    <span class="flex items-center gap-2 text-sm font-black text-[#032B45]">
+                                        <svg class="w-5 h-5 text-[#00A88F]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l2.4 12.2a2 2 0 002 1.6h8.8a2 2 0 002-1.6L22 8H6"></path>
+                                            <circle cx="10" cy="21" r="1"></circle>
+                                            <circle cx="19" cy="21" r="1"></circle>
+                                        </svg>
+                                        Detalle del pedido
+                                    </span>
 
-                            </tr>
+                                    <svg class="w-4 h-4 text-[#032B45] transition-transform duration-200" :class="detalleAbierto ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+                                    </svg>
+                                </button>
 
-                        @empty
+                                <div x-show="detalleAbierto" x-transition style="display:none;" class="mt-3 bg-white border border-slate-300 rounded-2xl p-4 sm:p-5 space-y-3">
+                                    <h4 class="text-xs font-black uppercase tracking-wider text-slate-500">
+                                        Productos solicitados
+                                    </h4>
 
-                            <tr>
-                                <td colspan="5">Todavía no hay pedidos.</td>
-                            </tr>
+                                    @forelse($pedido->detalles as $detalle)
+                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3 last:border-0 last:pb-0">
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-extrabold text-[#032B45]">
+                                                    {{ $detalle->producto?->nombre ?? 'Producto no disponible' }}
+                                                </p>
 
-                        @endforelse
+                                                <p class="text-xs text-slate-500 font-semibold mt-1">
+                                                    Cantidad: {{ $detalle->cantidad }}
+                                                </p>
 
-                    </tbody>
+                                                <p class="text-xs text-slate-500">
+                                                    Precio unitario: ${{ number_format($detalle->precio_unitario, 2, ',', '.') }}
+                                                </p>
+                                            </div>
 
-                </table>
+                                            <div class="text-sm font-black text-[#008f7a] sm:text-right">
+                                                ${{ number_format($detalle->subtotal, 2, ',', '.') }}
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <p class="text-sm text-slate-500 text-center py-3">
+                                            No hay productos registrados para este pedido.
+                                        </p>
+                                    @endforelse
 
-            </div>
-
+                                    <div class="flex justify-between items-center border-t border-slate-200 pt-3">
+                                        <span class="text-sm font-black text-[#032B45]">Total del pedido</span>
+                                        <span class="text-base font-black text-[#008f7a]">
+                                            ${{ number_format($pedido->total, 2, ',', '.') }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="text-center py-10 bg-slate-50 border border-slate-200 rounded-[2rem]">
+                            <p class="text-sm font-bold text-slate-600">No hay pedidos para esta fecha.</p>
+                        </div>
+                    @endforelse
+                </div>
+            @endforeach
         </section>
 
-    </div>
+        {{-- PRODUCTOS --}}
+        <section x-show="tab === 'productos'" class="space-y-6">
+            <h2 class="text-xl sm:text-2xl font-black text-[#032B45] tracking-tight">Productos actuales</h2>
 
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @forelse($productos as $producto)
+                    @php
+                        $precio = $producto->precios->first();
+                        $imagenProducto = $producto->imagen
+                            ? asset('storage/' . ltrim($producto->imagen, '/'))
+                            : null;
+                    @endphp
+
+                    <div class="bg-slate-300/95 border border-slate-400/80 p-5 rounded-[2rem] flex flex-col justify-between shadow-md space-y-4">
+                        <div class="flex items-start gap-4">
+                            @if($imagenProducto)
+                                <img src="{{ $imagenProducto }}" alt="{{ $producto->nombre }}" class="w-16 h-16 object-cover rounded-2xl border border-slate-300 shadow-sm flex-shrink-0 bg-white" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="w-16 h-16 bg-white border border-slate-300 rounded-2xl items-center justify-center text-[10px] font-bold text-slate-500 flex-shrink-0 hidden">
+                                    Sin img
+                                </div>
+                            @else
+                                <div class="w-16 h-16 bg-white border border-slate-300 rounded-2xl flex items-center justify-center text-[10px] font-bold text-slate-500 flex-shrink-0">
+                                    Sin img
+                                </div>
+                            @endif
+
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-bold text-[#032B45] truncate text-base">{{ $producto->nombre }}</h4>
+                                <p class="text-xs font-semibold text-slate-700 mt-1">
+                                    Precio: <span class="text-[#00A88F] font-black">${{ number_format($precio?->precio ?? 0, 2, ',', '.') }}</span>
+                                </p>
+                                <p class="text-xs font-semibold text-slate-700">
+                                    Stock: <span class="font-bold text-slate-900">{{ $producto->stock }}</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-400/60 space-y-2">
+                            <details>
+                                <summary class="text-xs font-bold text-[#00A88F] cursor-pointer hover:underline">Editar producto</summary>
+
+                                <form method="POST" action="{{ route('dashboard.producto.update', $producto->id_producto) }}" enctype="multipart/form-data" class="mt-3 space-y-3 bg-white p-4 rounded-2xl border border-slate-300 text-left shadow-sm" x-data="{ fileName: '' }">
+                                    @csrf
+                                    @method('PUT')
+
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase">Nombre</label>
+                                        <input type="text" name="nombre" value="{{ $producto->nombre }}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800">
+                                    </div>
+
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase">Descripción</label>
+                                        <textarea name="descripcion" rows="2" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800">{{ $producto->descripcion }}</textarea>
+                                    </div>
+
+                                    <div>
+                                        <label class="text-[11px] font-bold text-slate-700 uppercase block mb-1">Cambiar imagen</label>
+                                        <label class="flex items-center justify-center px-4 py-2 bg-[#032B45] hover:bg-[#00A88F] text-white rounded-xl text-xs font-bold cursor-pointer transition-colors shadow-2xs">
+                                            <span>Seleccionar nueva foto</span>
+                                            <input type="file" name="imagen" accept="image/*" class="hidden" @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''">
+                                        </label>
+                                        <p class="text-[10px] text-slate-500 mt-1 italic truncate" x-text="fileName ? 'Archivo: ' + fileName : 'Ningún archivo nuevo seleccionado'"></p>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase">Stock</label>
+                                            <input type="number" name="stock" min="0" value="{{ $producto->stock }}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800">
+                                        </div>
+                                        <div>
+                                            <label class="text-[11px] font-bold text-slate-700 uppercase">Precio</label>
+                                            <input type="number" name="precio" min="0" step="0.01" value="{{ $precio?->precio ?? 0 }}" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800">
+                                        </div>
+                                    </div>
+
+                                    <button type="submit" class="w-full bg-[#032B45] hover:bg-[#00A88F] text-white font-bold py-2 px-4 rounded-xl text-xs transition-colors shadow-sm">
+                                        Guardar cambios
+                                    </button>
+                                </form>
+                            </details>
+
+                            <form method="POST" action="{{ route('dashboard.producto.destroy', $producto->id_producto) }}" onsubmit="return confirm('¿Seguro que querés eliminar este producto?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-xs font-bold text-rose-600 hover:underline">
+                                    Eliminar producto
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-sm text-slate-400 font-medium col-span-full text-center py-8">No hay productos cargados aún.</p>
+                @endforelse
+            </div>
+        </section>
+
+        {{-- AGREGAR PRODUCTO --}}
+        <section x-show="tab === 'agregar'" class="space-y-6 max-w-xl mx-auto">
+            <div class="bg-slate-300/95 p-6 sm:p-8 rounded-[2.5rem] shadow-md border border-slate-400/80 space-y-6">
+                <h2 class="text-xl sm:text-2xl font-black text-[#032B45] tracking-tight">Agregar producto nuevo</h2>
+
+                <form method="POST" action="{{ route('dashboard.producto.store') }}" enctype="multipart/form-data" class="space-y-4" x-data="{ fileName: '' }">
+                    @csrf
+                    <div>
+                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider pl-1">Nombre del producto</label>
+                        <input type="text" name="nombre" value="{{ old('nombre') }}" required class="w-full bg-white border border-slate-300 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#00A88F]">
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider pl-1">Descripción</label>
+                        <textarea name="descripcion" rows="3" class="w-full bg-white border border-slate-300 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#00A88F]">{{ old('descripcion') }}</textarea>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-slate-700 uppercase tracking-wider pl-1 block mb-1">Imagen del producto</label>
+                        <label class="flex items-center justify-center w-full px-4 py-3 bg-white hover:bg-slate-50 border border-slate-300 text-[#032B45] rounded-2xl text-sm font-bold cursor-pointer transition-all shadow-2xs">
+                            <span>Elegir imagen del producto</span>
+                            <input type="file" name="imagen" accept="image/*" class="hidden" @change="fileName = $event.target.files[0] ? $event.target.files[0].name : ''">
+                        </label>
+                        <p class="text-xs text-slate-600 mt-1.5 pl-1 italic" x-text="fileName ? 'Archivo seleccionado: ' + fileName : 'Ningún archivo seleccionado'"></p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider pl-1">Stock</label>
+                            <input type="number" name="stock" min="0" value="{{ old('stock') }}" required class="w-full bg-white border border-slate-300 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#00A88F]">
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-slate-700 uppercase tracking-wider pl-1">Precio</label>
+                            <input type="number" step="0.01" name="precio" min="0" value="{{ old('precio') }}" required class="w-full bg-white border border-slate-300 rounded-2xl px-4 py-3 text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#00A88F]">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full bg-[#00A88F] hover:bg-[#008f7a] text-white font-extrabold py-3.5 px-6 rounded-2xl shadow-lg shadow-[#00A88F]/20 transition-all text-base">
+                        Guardar producto &rarr;
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        {{-- CONFIGURACIÓN --}}
+        <section x-show="tab === 'configuracion'" class="space-y-6 max-w-xl mx-auto">
+            <div class="bg-slate-300/95 p-6 sm:p-8 rounded-[2.5rem] shadow-md border border-slate-400/80 space-y-6">
+                <h2 class="text-xl sm:text-2xl font-black text-[#032B45] tracking-tight">Configuración del negocio</h2>
+
+                <div class="space-y-4 pb-4 border-b border-slate-400/60">
+                    <h3 class="text-xs font-black text-slate-700 uppercase tracking-wider">Agregar tipo de precio</h3>
+                    <form method="POST" action="{{ route('dashboard.tipos.precio.store') }}" class="space-y-3">
+                        @csrf
+                        <input type="text" name="nombre" placeholder="Ej: Mayorista, Promo, Familias" required class="w-full bg-white border border-slate-300 rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#00A88F]">
+                        <input type="text" name="descripcion" placeholder="Descripción opcional" class="w-full bg-white border border-slate-300 rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#00A88F]">
+                        <button type="submit" class="bg-[#032B45] hover:bg-[#00A88F] text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors shadow-sm">Guardar tipo de precio</button>
+                    </form>
+                </div>
+
+                <div class="space-y-4 pb-4 border-b border-slate-400/60">
+                    <h3 class="text-xs font-black text-slate-700 uppercase tracking-wider">Agregar tipo de entrega</h3>
+                    <form method="POST" action="{{ route('dashboard.tipos.entrega.store') }}" class="space-y-3">
+                        @csrf
+                        <input type="text" name="nombre" placeholder="Ej: Delivery, Retiro, Express" required class="w-full bg-white border border-slate-300 rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#00A88F]">
+                        <button type="submit" class="bg-[#032B45] hover:bg-[#00A88F] text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors shadow-sm">Guardar tipo de entrega</button>
+                    </form>
+                </div>
+
+                <div class="space-y-4">
+                    <h3 class="text-xs font-black text-slate-700 uppercase tracking-wider">Agregar método de pago</h3>
+                    <form method="POST" action="{{ route('dashboard.metodos.pago.store') }}" class="space-y-3">
+                        @csrf
+                        <input type="text" name="nombre" placeholder="Ej: Efectivo, POS" required class="w-full bg-white border border-slate-300 rounded-2xl px-4 py-2.5 text-sm font-semibold text-slate-800 focus:outline-none focus:border-[#00A88F]">
+                        <button type="submit" class="bg-[#032B45] hover:bg-[#00A88F] text-white font-bold py-2.5 px-4 rounded-xl text-xs transition-colors shadow-sm">Guardar método de pago</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
 </div>
 
 </body>
